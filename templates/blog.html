@@ -1,0 +1,912 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Architecture Blog') }} | Oslo Arch Lab{% endblock %}
+
+{% block head %}
+<style>
+/* Стили для блога */
+.blog-hero {
+    height: 60vh;
+    min-height: 500px;
+    background: linear-gradient(135deg, rgba(26, 75, 109, 0.9), rgba(77, 184, 201, 0.8)),
+                url('/static/myphotos/blog 1.jpeg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    margin-top: 80px;
+}
+
+.blog-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
+
+/* Главный пост */
+.featured-post {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 4rem;
+    margin: 4rem 0;
+    align-items: center;
+}
+
+@media (max-width: 992px) {
+    .featured-post {
+        grid-template-columns: 1fr;
+    }
+}
+
+.featured-image {
+    height: 400px;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    position: relative;
+}
+
+.featured-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.featured-image:hover img {
+    transform: scale(1.05);
+}
+
+.featured-badge {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    background: var(--color-aurora-teal);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.featured-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.post-category {
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    background: rgba(77, 184, 201, 0.1);
+    color: var(--color-aurora-teal);
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.read-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-light);
+    font-size: 0.875rem;
+}
+
+/* Сетка постов */
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.blog-card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-medium);
+}
+
+.blog-image {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.blog-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.blog-card:hover .blog-image img {
+    transform: scale(1.05);
+}
+
+.blog-content {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.author-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-aurora-teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.blog-excerpt {
+    color: var(--color-text-light);
+    margin-bottom: 1.5rem;
+    flex: 1;
+}
+
+.read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-fjord);
+    font-weight: 600;
+    margin-top: auto;
+    transition: var(--transition);
+}
+
+.read-more:hover {
+    color: var(--color-aurora-teal);
+    gap: 0.75rem;
+}
+
+/* Фильтры и поиск */
+.blog-filters {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 3rem;
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.blog-search {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+}
+
+.blog-search input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.blog-search input:focus {
+    border-color: var(--color-aurora-teal);
+    outline: none;
+}
+
+.blog-search i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-light);
+}
+
+.filter-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-tag {
+    padding: 0.5rem 1rem;
+    background: var(--color-snow);
+    border: 1px solid #e5e7eb;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-tag:hover,
+.filter-tag.active {
+    background: var(--color-fjord);
+    color: white;
+    border-color: var(--color-fjord);
+}
+
+/* Популярные посты */
+.popular-sidebar {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-soft);
+    margin-top: 4rem;
+}
+
+.popular-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.popular-post {
+    display: flex;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.popular-post:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.popular-image {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.popular-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.popular-content {
+    flex: 1;
+}
+
+.popular-content h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.popular-meta {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Пагинация */
+.blog-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 4rem;
+}
+
+.pagination-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pagination-btn:hover,
+.pagination-btn.active {
+    background: var(--color-fjord);
+    color: white;
+    border-color: var(--color-fjord);
+}
+
+.pagination-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Рассылка */
+.newsletter-cta {
+    background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+    color: white;
+    border-radius: var(--border-radius-lg);
+    padding: 4rem;
+    margin: 4rem 0;
+    text-align: center;
+}
+
+.newsletter-cta h2 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.newsletter-form {
+    max-width: 500px;
+    margin: 2rem auto 0;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.newsletter-form input {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-family: 'Inter', sans-serif;
+}
+
+.newsletter-form .btn {
+    padding: 0.75rem 2rem;
+}
+
+@media (max-width: 768px) {
+    .blog-filters {
+        padding: 1.5rem;
+    }
+    
+    .filter-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .blog-search {
+        min-width: 100%;
+    }
+    
+    .newsletter-form {
+        flex-direction: column;
+    }
+    
+    .newsletter-form input,
+    .newsletter-form .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Герой секция блога -->
+<section class="blog-hero">
+    <div class="container">
+        <h1 class="reveal" style="font-size: 4rem; margin-bottom: 1rem;">{{ _('Architecture Blog') }}</h1>
+        <p class="reveal" style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">
+            {{ _('Insights, trends, and inspiration for Oslo homeowners and architecture enthusiasts.') }}
+        </p>
+    </div>
+</section>
+
+<!-- Основной контейнер -->
+<div class="blog-container">
+    <!-- Главный пост -->
+    <div class="featured-post reveal">
+        <div class="featured-image">
+             <img src="/static/myphotos/blog 2.jpeg">
+            <div class="featured-badge">{{ _('Featured') }}</div>
+        </div>
+        <div class="featured-content">
+            <div>
+                <span class="post-category">{{ _('Sustainable Design') }}</span>
+                <span class="read-time">
+                    <i class="far fa-clock"></i> {{ _('8 min read') }}
+                </span>
+            </div>
+            <h2 style="font-size: 2rem;">{{ _('Passive House Design in Oslo: A Complete Guide') }}</h2>
+            <p>{{ _('Discover how passive house principles can revolutionize energy efficiency in Oslo\'s climate. Learn about insulation, ventilation, and solar gain optimization for Norwegian homes.') }}</p>
+            <div class="author-info">
+                <div class="author-avatar">ML</div>
+                <div>
+                    <div style="font-weight: 600;">{{ _('Marta Larsen') }}</div>
+                    <div style="font-size: 0.875rem; color: var(--color-text-light);">{{ _('Lead Architect') }}</div>
+                </div>
+                <span style="margin-left: auto; color: var(--color-text-light);">{{ _('Nov 15, 2023') }}</span>
+            </div>
+            <a href="{{ url_for('blog_post', slug='passive-house-design-oslo') }}" class="btn">
+                {{ _('Read Full Article') }} <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Фильтры и поиск -->
+    <div class="blog-filters">
+        <div class="filter-header">
+            <div class="blog-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="{{ _('Search articles...') }}" id="blogSearch">
+            </div>
+            <div class="filter-tags-container">
+                <span class="filter-tag active" data-category="all">{{ _('All Topics') }}</span>
+                <span class="filter-tag" data-category="design">{{ _('Design Tips') }}</span>
+                <span class="filter-tag" data-category="sustainable">{{ _('Sustainable Living') }}</span>
+                <span class="filter-tag" data-category="materials">{{ _('Materials') }}</span>
+                <span class="filter-tag" data-category="renovation">{{ _('Renovation') }}</span>
+                <span class="filter-tag" data-category="trends">{{ _('Trends') }}</span>
+                <span class="filter-tag" data-category="guides">{{ _('Guides') }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сетка постов -->
+    <div class="blog-grid" id="blogGrid">
+        <!-- Пост 1 -->
+        <div class="blog-card reveal" data-category="design" data-tags="interior,small-spaces">
+            <div class="blog-image">
+               <img src="/static/myphotos/1 blog Maximizing Small Spaces in Oslo Apartments.jpeg">
+            </div>
+            <div class="blog-content">
+                <div class="blog-meta">
+                    <span class="post-category">{{ _('Design Tips') }}</span>
+                    <span>{{ _('Oct 28, 2023') }}</span>
+                </div>
+                <h3>{{ _('Maximizing Small Spaces in Oslo Apartments') }}</h3>
+                <p class="blog-excerpt">{{ _('Smart storage solutions and layout tricks for making the most of compact Oslo living spaces...') }}</p>
+                <div class="author-info">
+                    <div class="author-avatar">ES</div>
+                    <span>{{ _('Erik Sørensen') }}</span>
+                </div>
+                <a href="{{ url_for('blog_post', slug='small-space-design-oslo') }}" class="read-more">
+                    {{ _('Read More') }} <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Пост 2 -->
+        <div class="blog-card reveal" data-category="sustainable" data-tags="energy,heating">
+            <div class="blog-image">
+               <img src="/static/myphotos/2 blog Heat Pumps in Norway.jpeg">
+            </div>
+            <div class="blog-content">
+                <div class="blog-meta">
+                    <span class="post-category">{{ _('Sustainable Living') }}</span>
+                    <span>{{ _('Sep 12, 2023') }}</span>
+                </div>
+                <h3>{{ _('Heat Pumps in Norway: What You Need to Know') }}</h3>
+                <p class="blog-excerpt">{{ _('A comprehensive guide to choosing and installing heat pumps for Oslo homes, including subsidy information...') }}</p>
+                <div class="author-info">
+                    <div class="author-avatar">TH</div>
+                    <span>{{ _('Thomas Hansen') }}</span>
+                </div>
+                <a href="{{ url_for('blog_post', slug='heat-pumps-norway-guide') }}" class="read-more">
+                    {{ _('Read More') }} <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Пост 3 -->
+        <div class="blog-card reveal" data-category="materials" data-tags="wood,sustainable">
+            <div class="blog-image">
+               <img src="/static/myphotos/3 blog he Beauty of Norwegian Timber.jpeg">
+            </div>
+            <div class="blog-content">
+                <div class="blog-meta">
+                    <span class="post-category">{{ _('Materials') }}</span>
+                    <span>{{ _('Aug 5, 2023') }}</span>
+                </div>
+                <h3>{{ _('The Beauty of Norwegian Timber: A Material Guide') }}</h3>
+                <p class="blog-excerpt">{{ _('Exploring different types of Norwegian wood, their properties, and best uses in residential architecture...') }}</p>
+                <div class="author-info">
+                    <div class="author-avatar">KB</div>
+                    <span>{{ _('Kari Berg') }}</span>
+                </div>
+                <a href="{{ url_for('blog_post', slug='norwegian-timber-guide') }}" class="read-more">
+                    {{ _('Read More') }} <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Пост 4 -->
+        <div class="blog-card reveal" data-category="renovation" data-tags="permit,budget">
+            <div class="blog-image">
+               <img src="/static/myphotos/4 blog  Oslo Renovation Permits.jpeg">
+            </div>
+            <div class="blog-content">
+                <div class="blog-meta">
+                    <span class="post-category">{{ _('Renovation') }}</span>
+                    <span>{{ _('Jul 18, 2023') }}</span>
+                </div>
+                <h3>{{ _('Oslo Renovation Permits: A Step-by-Step Guide') }}</h3>
+                <p class="blog-excerpt">{{ _('Navigating Oslo municipality\'s permit process for home renovations and extensions...') }}</p>
+                <div class="author-info">
+                    <div class="author-avatar">AR</div>
+                    <span>{{ _('Anders Rød') }}</span>
+                </div>
+                <a href="{{ url_for('blog_post', slug='oslo-renovation-permits') }}" class="read-more">
+                    {{ _('Read More') }} <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Пост 5 -->
+        <div class="blog-card reveal" data-category="trends" data-tags="2024,design-trends">
+            <div class="blog-image">
+                 <img src="/static/myphotos/5 blog 2024 Architecture Trends for Oslo Homes.jpeg">
+            </div>
+            <div class="blog-content">
+                <div class="blog-meta">
+                    <span class="post-category">{{ _('Trends') }}</span>
+                    <span>{{ _('Jun 30, 2023') }}</span>
+                </div>
+                <h3>{{ _('2024 Architecture Trends for Oslo Homes') }}</h3>
+                <p class="blog-excerpt">{{ _('From biophilic design to smart home integration, discover what\'s shaping Oslo residential architecture...') }}</p>
+                <div class="author-info">
+                    <div class="author-avatar">IN</div>
+                    <span>{{ _('Ingrid Nilsen') }}</span>
+                </div>
+                <a href="{{ url_for('blog_post', slug='2024-architecture-trends-oslo') }}" class="read-more">
+                    {{ _('Read More') }} <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Пост 6 -->
+        <div class="blog-card reveal" data-category="guides" data-tags="budget,cost">
+            <div class="blog-image">
+               <img src="/static/myphotos/6 blog Realistic Budget Planning for Oslo Home Projects.jpeg">
+            </div>
+            <div class="blog-content">
+                <div class="blog-meta">
+                    <span class="post-category">{{ _('Guides') }}</span>
+                    <span>{{ _('May 22, 2023') }}</span>
+                </div>
+                <h3>{{ _('Realistic Budget Planning for Oslo Home Projects') }}</h3>
+                <p class="blog-excerpt">{{ _('How to create an accurate budget for your Oslo home project, including hidden costs to consider...') }}</p>
+                <div class="author-info">
+                    <div class="author-avatar">PS</div>
+                    <span>{{ _('Per Strøm') }}</span>
+                </div>
+                <a href="{{ url_for('blog_post', slug='budget-planning-oslo-homes') }}" class="read-more">
+                    {{ _('Read More') }} <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Пагинация -->
+    <div class="blog-pagination">
+        <button class="pagination-btn disabled">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="pagination-btn active">1</button>
+        <button class="pagination-btn">2</button>
+        <button class="pagination-btn">3</button>
+        <button class="pagination-btn">4</button>
+        <button class="pagination-btn">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- Боковая панель с популярными постами -->
+    <div class="popular-sidebar reveal">
+        <h3>{{ _('Most Popular Articles') }}</h3>
+        <div class="popular-posts">
+            <div class="popular-post">
+                <div class="popular-image">
+                    <img src="/static/myphotos/blog Passive House Design Guide.jpeg">
+                </div>
+                <div class="popular-content">
+                    <h4>{{ _('Passive House Design Guide') }}</h4>
+                    <div class="popular-meta">
+                        <span>{{ _('1.2K reads') }}</span>
+                        <span>•</span>
+                        <span>{{ _('Nov 15, 2023') }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="popular-post">
+                <div class="popular-image">
+                    <img src="/static/myphotos/blog Small Space Design Tips.jpeg">
+                </div>
+                <div class="popular-content">
+                    <h4>{{ _('Small Space Design Tips') }}</h4>
+                    <div class="popular-meta">
+                        <span>{{ _('980 reads') }}</span>
+                        <span>•</span>
+                        <span>{{ _('Oct 28, 2023') }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="popular-post">
+                <div class="popular-image">
+                    <img src="/static/myphotos/blog Heat Pumps Guide.jpeg">
+                </div>
+                <div class="popular-content">
+                    <h4>{{ _('Heat Pumps Guide') }}</h4>
+                    <div class="popular-meta">
+                        <span>{{ _('850 reads') }}</span>
+                        <span>•</span>
+                        <span>{{ _('Sep 12, 2023') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Рассылка -->
+    <div class="newsletter-cta reveal">
+        <h2>{{ _('Stay Updated with Oslo Architecture') }}</h2>
+        <p style="max-width: 600px; margin: 0 auto; opacity: 0.9;">
+            {{ _('Get monthly articles, tips, and inspiration delivered to your inbox. No spam, just quality content.') }}
+        </p>
+        
+        <form class="newsletter-form" id="newsletterForm">
+            <input type="email" placeholder="{{ _('Your email address') }}" required>
+            <button type="submit" class="btn" style="background: white; color: var(--color-fjord);">
+                {{ _('Subscribe') }} <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+        
+        <p style="margin-top: 1rem; font-size: 0.875rem; opacity: 0.7;">
+            {{ _('You can unsubscribe at any time. We respect your privacy.') }}
+        </p>
+    </div>
+</div>
+
+<!-- CTA секция -->
+<section class="section" style="background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight)); color: white;">
+    <div class="container text-center">
+        <h2 class="reveal" style="color: white;">{{ _('Have a Topic in Mind?') }}</h2>
+        <p class="reveal" style="max-width: 700px; margin: 0 auto 2rem; font-size: 1.2rem; opacity: 0.9;">
+            {{ _('Suggest topics you\'d like us to cover, or share your own Oslo architecture story.') }}
+        </p>
+        <div class="reveal" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('contact') }}" class="btn" style="background: white; color: var(--color-fjord);">
+                {{ _('Suggest a Topic') }} <i class="fas fa-lightbulb"></i>
+            </a>
+            <a href="{{ url_for('portfolio') }}" class="btn btn-outline" style="border-color: white; color: white;">
+                {{ _('See Our Work') }} <i class="fas fa-building"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Инициализация блога
+document.addEventListener('DOMContentLoaded', function() {
+    // Поиск статей
+    const searchInput = document.getElementById('blogSearch');
+    const blogCards = document.querySelectorAll('.blog-card');
+    const filterTags = document.querySelectorAll('.filter-tag');
+    
+    // Текущие фильтры
+    let currentFilters = {
+        category: 'all',
+        searchTerm: ''
+    };
+    
+    // Обработчик поиска
+    searchInput.addEventListener('input', function() {
+        currentFilters.searchTerm = this.value.toLowerCase().trim();
+        applyFilters();
+    });
+    
+    // Обработчик фильтров по категориям
+    filterTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+            // Снимаем активность со всех тегов
+            filterTags.forEach(t => t.classList.remove('active'));
+            // Активируем текущий
+            this.classList.add('active');
+            
+            currentFilters.category = this.dataset.category;
+            applyFilters();
+        });
+    });
+    
+    // Функция применения фильтров
+    function applyFilters() {
+        blogCards.forEach(card => {
+            const cardCategory = card.dataset.category;
+            const cardTags = card.dataset.tags || '';
+            const cardTitle = card.querySelector('h3').textContent.toLowerCase();
+            const cardExcerpt = card.querySelector('.blog-excerpt').textContent.toLowerCase();
+            
+            let showCard = true;
+            
+            // Фильтр по категории
+            if (currentFilters.category !== 'all' && cardCategory !== currentFilters.category) {
+                showCard = false;
+            }
+            
+            // Фильтр по поиску
+            if (currentFilters.searchTerm && 
+                !cardTitle.includes(currentFilters.searchTerm) && 
+                !cardExcerpt.includes(currentFilters.searchTerm) &&
+                !cardTags.includes(currentFilters.searchTerm)) {
+                showCard = false;
+            }
+            
+            // Показываем/скрываем карточку
+            if (showCard) {
+                card.style.display = 'block';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    
+    // Подписка на рассылку
+    const newsletterForm = document.getElementById('newsletterForm');
+    newsletterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = this.querySelector('input[type="email"]').value;
+        
+        // Показать уведомление
+        showNotification('{{ _("Thank you for subscribing! Check your email to confirm.") }}', 'success');
+        this.reset();
+    });
+    
+    // Пагинация
+    const paginationBtns = document.querySelectorAll('.pagination-btn:not(.disabled)');
+    paginationBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.classList.contains('active')) return;
+            
+            // Снимаем активность со всех кнопок
+            document.querySelectorAll('.pagination-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            // Активируем текущую
+            this.classList.add('active');
+            
+            //загрузка новой страницы
+            showNotification('{{ _("Loading page...") }}', 'info');
+        });
+    });
+    
+    // Анимация появления
+    const revealElements = document.querySelectorAll('.reveal');
+    const revealOnScroll = () => {
+        const windowHeight = window.innerHeight;
+        const revealPoint = 150;
+        
+        revealElements.forEach(element => {
+            const revealTop = element.getBoundingClientRect().top;
+            
+            if (revealTop < windowHeight - revealPoint) {
+                element.classList.add('active');
+            }
+        });
+    };
+    
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll();
+    
+    // Отслеживание прочтений
+    const readMoreLinks = document.querySelectorAll('.read-more');
+    readMoreLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const articleTitle = this.closest('.blog-card').querySelector('h3').textContent;
+            
+            //отправка данных аналитики
+            console.log(`Article read: ${articleTitle}`);
+        });
+    });
+});
+
+// Функция показа уведомлений
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-medium);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+    `;
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 5000);
+}
+
+// Добавляем стили для анимаций уведомлений
+if (!document.getElementById('notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+</script>
+{% endblock %}

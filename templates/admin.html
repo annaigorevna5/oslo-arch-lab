@@ -1,0 +1,1770 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Admin Panel') }} | Oslo Arch Lab{% endblock %}
+
+{% block head %}
+<style>
+    
+/* Основной контейнер */
+.admin-main {
+    margin-top: 80px;
+    min-height: calc(100vh - 80px);
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    padding: 2rem;
+}
+
+.admin-container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Хедер админки */
+.admin-header {
+    background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+    color: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(77, 184, 201, 0.1) 0%, transparent 70%);
+}
+
+.admin-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-title h1 {
+    color: white;
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.admin-title i {
+    color: var(--color-aurora-teal);
+    font-size: 2.5rem;
+}
+
+.admin-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    max-width: 600px;
+}
+
+/* Статистика */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+    border-color: var(--color-aurora-teal);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--color-aurora-teal);
+}
+
+.stat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card-header i {
+    color: var(--color-aurora-teal);
+    font-size: 1.5rem;
+}
+
+.stat-card-header h3 {
+    color: white;
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.stat-trend.positive {
+    color: #10b981;
+}
+
+.stat-trend.negative {
+    color: #ef4444;
+}
+
+/* Быстрые действия */
+.quick-actions {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    background: var(--color-snow);
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.action-btn:hover {
+    border-color: var(--color-aurora-teal);
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+.action-btn i {
+    font-size: 1.75rem;
+    color: var(--color-fjord);
+}
+
+.action-btn span {
+    font-weight: 600;
+    color: var(--color-midnight);
+}
+
+.action-btn small {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+/* Основной контент */
+.admin-content {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .admin-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Боковая панель */
+.admin-sidebar {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-soft);
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.admin-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-tab {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+    width: 100%;
+}
+
+.admin-tab:hover {
+    background: var(--color-snow);
+    color: var(--color-fjord);
+}
+
+.admin-tab.active {
+    background: var(--color-fjord);
+    color: white;
+}
+
+.admin-tab i {
+    width: 20px;
+    text-align: center;
+}
+
+.tab-badge {
+    margin-left: auto;
+    background: var(--color-aurora-teal);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* Табы контента */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Таблицы */
+.admin-table-container {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+}
+
+.admin-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.search-box {
+    position: relative;
+    min-width: 300px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    font-family: 'Inter', sans-serif;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-light);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    background: var(--color-snow);
+    color: var(--color-midnight);
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: var(--color-text);
+}
+
+.admin-table tr:hover {
+    background: var(--color-snow);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-new {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.status-read {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius-sm);
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-icon:hover {
+    border-color: var(--color-aurora-teal);
+    color: var(--color-aurora-teal);
+}
+
+.btn-icon.delete:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+/* Сетка проектов */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.project-card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition);
+    border: 1px solid #e5e7eb;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--color-aurora-teal);
+}
+
+.project-image {
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+}
+
+.project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.project-card:hover .project-image img {
+    transform: scale(1.05);
+}
+
+.project-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--color-fjord);
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.project-content {
+    padding: 1.5rem;
+}
+
+.project-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-midnight);
+}
+
+.project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+.project-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* Формы настроек */
+.settings-form {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.form-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.form-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-midnight);
+}
+
+.form-section h3 i {
+    color: var(--color-aurora-teal);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--color-midnight);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group label i {
+    color: var(--color-text-light);
+    font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--color-aurora-teal);
+    outline: none;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e7eb;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--color-aurora-teal);
+}
+
+input:checked + .slider:before {
+    transform: translateX(30px);
+}
+
+/* Модальные окна */
+.admin-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-strong);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-light);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background: var(--color-snow);
+    color: var(--color-text);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* Пагинация */
+.admin-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background: var(--color-snow);
+}
+
+.pagination-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pagination-btn:hover:not(.disabled) {
+    border-color: var(--color-aurora-teal);
+    color: var(--color-fjord);
+}
+
+.pagination-btn.active {
+    background: var(--color-fjord);
+    color: white;
+    border-color: var(--color-fjord);
+}
+
+.pagination-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .admin-main {
+        padding: 1rem;
+    }
+    
+    .admin-header {
+        padding: 1.5rem;
+    }
+    
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-table-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        min-width: 100%;
+    }
+    
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="admin-main">
+    <div class="admin-container">
+        <!-- Хедер админки -->
+        <header class="admin-header">
+            <div class="admin-title">
+                <i class="fas fa-cog"></i>
+                <h1>{{ _('Admin Panel') }}</h1>
+            </div>
+            <p class="admin-subtitle">
+                {{ _('Manage your website content, messages, and settings. Latest update:') }} {{ current_time.strftime('%Y-%m-%d %H:%M') }}
+            </p>
+            
+            <!-- Статистика -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <i class="fas fa-envelope"></i>
+                        <h3>{{ _('Messages') }}</h3>
+                    </div>
+                    <div class="stat-number">{{ messages_count }}</div>
+                    <div class="stat-trend {% if unread_messages > 0 %}positive{% endif %}">
+                        <i class="fas {% if unread_messages > 0 %}fa-arrow-up{% else %}fa-minus{% endif %}"></i>
+                        {{ unread_messages }} {{ _('unread') }}
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <i class="fas fa-project-diagram"></i>
+                        <h3>{{ _('Projects') }}</h3>
+                    </div>
+                    <div class="stat-number">{{ projects_count }}</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        {{ featured_projects }} {{ _('featured') }}
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <i class="fas fa-truck"></i>
+                        <h3>{{ _('Suppliers') }}</h3>
+                    </div>
+                    <div class="stat-number">{{ suppliers_count }}</div>
+                    <div class="stat-trend">
+                        <i class="fas fa-check"></i>
+                        {{ _('All active') }}
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>{{ _('Visitors') }}</h3>
+                    </div>
+                    <div class="stat-number">1,247</div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
+                        12% {{ _('from last month') }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Быстрые действия -->
+        <div class="quick-actions">
+            <h3 style="margin-bottom: 1rem; color: var(--color-midnight);">{{ _('Quick Actions') }}</h3>
+            <div class="actions-grid">
+                <button class="action-btn" onclick="showModal('addProjectModal')">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>{{ _('Add Project') }}</span>
+                    <small>{{ _('Portfolio item') }}</small>
+                </button>
+                
+                <button class="action-btn" onclick="showModal('addPostModal')">
+                    <i class="fas fa-newspaper"></i>
+                    <span>{{ _('Add Blog Post') }}</span>
+                    <small>{{ _('New article') }}</small>
+                </button>
+                
+                <button class="action-btn" onclick="showModal('addSupplierModal')">
+                    <i class="fas fa-user-tie"></i>
+                    <span>{{ _('Add Supplier') }}</span>
+                    <small>{{ _('Partner company') }}</small>
+                </button>
+                
+                <button class="action-btn" onclick="exportData()">
+                    <i class="fas fa-download"></i>
+                    <span>{{ _('Export Data') }}</span>
+                    <small>{{ _('CSV/JSON') }}</small>
+                </button>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="admin-content">
+            <!-- Боковая панель -->
+            <nav class="admin-sidebar">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>{{ _('Dashboard') }}</span>
+                    </button>
+                    
+                    <button class="admin-tab" data-tab="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span>{{ _('Messages') }}</span>
+                        {% if unread_messages > 0 %}
+                        <span class="tab-badge">{{ unread_messages }}</span>
+                        {% endif %}
+                    </button>
+                    
+                    <button class="admin-tab" data-tab="projects">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>{{ _('Projects') }}</span>
+                        <span class="tab-badge">{{ projects_count }}</span>
+                    </button>
+                    
+                    <button class="admin-tab" data-tab="blog">
+                        <i class="fas fa-blog"></i>
+                        <span>{{ _('Blog Posts') }}</span>
+                    </button>
+                    
+                    <button class="admin-tab" data-tab="suppliers">
+                        <i class="fas fa-truck"></i>
+                        <span>{{ _('Suppliers') }}</span>
+                        <span class="tab-badge">{{ suppliers_count }}</span>
+                    </button>
+                    
+                    <button class="admin-tab" data-tab="analytics">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>{{ _('Analytics') }}</span>
+                    </button>
+                    
+                    <button class="admin-tab" data-tab="settings">
+                        <i class="fas fa-cogs"></i>
+                        <span>{{ _('Settings') }}</span>
+                    </button>
+                </div>
+                
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--color-aurora-teal), var(--color-aurora-purple)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            {{ session.get('user_initials', 'A') }}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">{{ session.get('username', 'Admin') }}</div>
+                            <div style="font-size: 0.875rem; color: var(--color-text-light);">{{ _('Administrator') }}</div>
+                        </div>
+                    </div>
+                    <button class="admin-tab" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>{{ _('Logout') }}</span>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Контент табов -->
+            <div class="tab-content active" id="dashboard-tab">
+                <div class="admin-table-container">
+                    <div class="admin-table-header">
+                        <h3 style="margin: 0; color: var(--color-midnight);">{{ _('Recent Activity') }}</h3>
+                        <div class="admin-table-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="{{ _('Search activity...') }}" id="activitySearch">
+                            </div>
+                            <select style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: var(--border-radius); background: white;">
+                                <option>{{ _('Last 7 days') }}</option>
+                                <option>{{ _('Last 30 days') }}</option>
+                                <option>{{ _('Last 90 days') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>{{ _('Time') }}</th>
+                                <th>{{ _('User') }}</th>
+                                <th>{{ _('Action') }}</th>
+                                <th>{{ _('Details') }}</th>
+                                <th>{{ _('IP Address') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>10:30 AM</td>
+                                <td>You</td>
+                                <td>{{ _('Logged in') }}</td>
+                                <td>{{ _('Admin panel access') }}</td>
+                                <td>192.168.1.1</td>
+                            </tr>
+                            <tr>
+                                <td>Yesterday, 15:42</td>
+                                <td>Marta Larsen</td>
+                                <td>{{ _('Added project') }}</td>
+                                <td>"Frogner Modern Villa"</td>
+                                <td>10.0.0.45</td>
+                            </tr>
+                            <tr>
+                                <td>Nov 28, 09:15</td>
+                                <td>System</td>
+                                <td>{{ _('Backup created') }}</td>
+                                <td>{{ _('Automatic daily backup') }}</td>
+                                <td>127.0.0.1</td>
+                            </tr>
+                            <tr>
+                                <td>Nov 27, 16:20</td>
+                                <td>Erik Sørensen</td>
+                                <td>{{ _('Updated blog post') }}</td>
+                                <td>"Passive House Design Guide"</td>
+                                <td>10.0.0.32</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="admin-pagination">
+                        <button class="pagination-btn disabled">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                        <button class="pagination-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сообщения -->
+            <div class="tab-content" id="messages-tab">
+                <div class="admin-table-container">
+                    <div class="admin-table-header">
+                        <h3 style="margin: 0; color: var(--color-midnight);">{{ _('Contact Messages') }}</h3>
+                        <div class="admin-table-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="{{ _('Search messages...') }}" id="messageSearch">
+                            </div>
+                            <select style="padding: 0.5rem 1rem; border: 2px solid #e5e7eb; border-radius: var(--border-radius); background: white;">
+                                <option>{{ _('All messages') }}</option>
+                                <option>{{ _('Unread only') }}</option>
+                                <option>{{ _('Last week') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>{{ _('Date') }}</th>
+                                <th>{{ _('Name') }}</th>
+                                <th>{{ _('Email') }}</th>
+                                <th>{{ _('Project Type') }}</th>
+                                <th>{{ _('Status') }}</th>
+                                <th>{{ _('Actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for message in recent_messages %}
+                            <tr>
+                                <td>{{ message.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ message.name }}</td>
+                                <td>{{ message.email }}</td>
+                                <td>{{ message.project_type or 'N/A' }}</td>
+                                <td>
+                                    <span class="status-badge {% if message.read %}status-read{% else %}status-new{% endif %}">
+                                        {{ _('Read') if message.read else _('New') }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn-icon" onclick="viewMessage({{ message.id }})" title="{{ _('View message') }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-icon" onclick="replyToMessage('{{ message.email }}')" title="{{ _('Reply') }}">
+                                            <i class="fas fa-reply"></i>
+                                        </button>
+                                        <button class="btn-icon delete" onclick="deleteMessage({{ message.id }})" title="{{ _('Delete') }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    <div class="admin-pagination">
+                        <button class="pagination-btn disabled">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                        <button class="pagination-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Проекты -->
+            <div class="tab-content" id="projects-tab">
+                <div class="admin-table-container">
+                    <div class="admin-table-header">
+                        <h3 style="margin: 0; color: var(--color-midnight);">{{ _('Portfolio Projects') }}</h3>
+                        <div class="admin-table-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="{{ _('Search projects...') }}" id="projectSearch">
+                            </div>
+                            <button class="btn" onclick="showModal('addProjectModal')">
+                                <i class="fas fa-plus"></i> {{ _('Add Project') }}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="projects-grid">
+                        {% for project in projects %}
+                        <div class="project-card">
+                            <div class="project-image">
+                                <img src="{{ project.image_url }}" alt="{{ project.title }}">
+                                {% if project.featured %}
+                                <span class="project-badge">{{ _('Featured') }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="project-content">
+                                <div class="project-title">{{ project.title }}</div>
+                                <div class="project-meta">
+                                    <span><i class="fas fa-tag"></i> {{ project.category }}</span>
+                                    <span><i class="fas fa-map-marker-alt"></i> {{ project.location }}</span>
+                                    <span><i class="fas fa-calendar"></i> {{ project.year }}</span>
+                                </div>
+                                <div class="project-actions">
+                                    <button class="btn-icon" onclick="editProject({{ project.id }})" title="{{ _('Edit') }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon" onclick="previewProject({{ project.id }})" title="{{ _('Preview') }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-icon delete" onclick="deleteProject({{ project.id }})" title="{{ _('Delete') }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="admin-pagination">
+                        <button class="pagination-btn disabled">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                        <button class="pagination-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Поставщики -->
+            <div class="tab-content" id="suppliers-tab">
+                <div class="admin-table-container">
+                    <div class="admin-table-header">
+                        <h3 style="margin: 0; color: var(--color-midnight);">{{ _('Suppliers') }}</h3>
+                        <div class="admin-table-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="{{ _('Search suppliers...') }}" id="supplierSearch">
+                            </div>
+                            <button class="btn" onclick="showModal('addSupplierModal')">
+                                <i class="fas fa-plus"></i> {{ _('Add Supplier') }}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>{{ _('Name') }}</th>
+                                <th>{{ _('Category') }}</th>
+                                <th>{{ _('Contact') }}</th>
+                                <th>{{ _('Rating') }}</th>
+                                <th>{{ _('Status') }}</th>
+                                <th>{{ _('Actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for supplier in suppliers %}
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div style="width: 36px; height: 36px; background: var(--color-snow); border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center; color: var(--color-fjord);">
+                                            <i class="fas fa-{{ 'tree' if supplier.category == 'Wood' else 'solar-panel' if supplier.category == 'Energy' else 'industry' }}"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600;">{{ supplier.name }}</div>
+                                            <div style="font-size: 0.875rem; color: var(--color-text-light);">{{ supplier.website|default('No website', true) }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ supplier.category }}</td>
+                                <td>
+                                    <div style="font-size: 0.875rem;">
+                                        <div>{{ supplier.phone }}</div>
+                                        <div style="color: var(--color-text-light);">{{ supplier.email|default('', true) }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                        {% for i in range(5) %}
+                                        <i class="fas fa-star" style="color: {{ '#fbbf24' if i < (supplier.rating|default(4)) else '#e5e7eb' }}; font-size: 0.875rem;"></i>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-read">{{ _('Active') }}</span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn-icon" onclick="editSupplier({{ supplier.id }})" title="{{ _('Edit') }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-icon delete" onclick="deleteSupplier({{ supplier.id }})" title="{{ _('Delete') }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Настройки -->
+            <div class="tab-content" id="settings-tab">
+                <form class="settings-form" id="settingsForm">
+                    <!-- Основные настройки -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-cog"></i> {{ _('General Settings') }}</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="siteTitle">{{ _('Site Title') }}</label>
+                                <input type="text" id="siteTitle" value="Oslo Arch Lab" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="siteTagline">{{ _('Site Tagline') }}</label>
+                                <input type="text" id="siteTagline" value="Architecture Studio in Oslo">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">{{ _('Contact Email') }}</label>
+                                <input type="email" id="contactEmail" value="hello@osloarchlab.no" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactPhone">{{ _('Contact Phone') }}</label>
+                                <input type="tel" id="contactPhone" value="+47 22 33 44 55">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="siteAddress">{{ _('Address') }}</label>
+                                <textarea id="siteAddress" rows="3">Akershusstranda 21, 0150 Oslo, Norway</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Настройки бизнеса -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-building"></i> {{ _('Business Settings') }}</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="currency">{{ _('Currency') }}</label>
+                                <select id="currency">
+                                    <option value="NOK" selected>Norwegian Krone (NOK)</option>
+                                    <option value="EUR">Euro (EUR)</option>
+                                    <option value="USD">US Dollar (USD)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="timezone">{{ _('Timezone') }}</label>
+                                <select id="timezone">
+                                    <option value="Europe/Oslo" selected>Europe/Oslo</option>
+                                    <option value="UTC">UTC</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="language">{{ _('Default Language') }}</label>
+                                <select id="language">
+                                    <option value="en" selected>English</option>
+                                    <option value="no">Norwegian</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Настройки отображения -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-eye"></i> {{ _('Display Settings') }}</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <div class="toggle-switch">
+                                    <span>{{ _('Show featured projects on homepage') }}</span>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="toggle-switch">
+                                    <span>{{ _('Show blog section') }}</span>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="toggle-switch">
+                                    <span>{{ _('Enable calculator') }}</span>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="toggle-switch">
+                                    <span>{{ _('Show supplier network') }}</span>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Настройки SEO -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-search"></i> {{ _('SEO Settings') }}</h3>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="metaDescription">{{ _('Meta Description') }}</label>
+                                <textarea id="metaDescription" rows="3">Oslo Arch Lab - Architecture studio specializing in sustainable home design in Oslo. Modern Scandinavian architecture, passive house design, and eco-friendly solutions.</textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="metaKeywords">{{ _('Meta Keywords') }}</label>
+                                <input type="text" id="metaKeywords" value="architecture Oslo, sustainable design, passive house, Scandinavian architecture, home renovation Oslo">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-aurora">
+                            <i class="fas fa-save"></i> {{ _('Save All Settings') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно сообщения -->
+    <div class="admin-modal" id="messageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-envelope"></i> {{ _('Message Details') }}</h3>
+                <button class="modal-close" onclick="hideModal('messageModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="messageDetails"></div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Инициализация админ-панели
+document.addEventListener('DOMContentLoaded', function() {
+    // Переключение табов
+    const tabs = document.querySelectorAll('.admin-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.dataset.tab;
+            
+            // Обновляем активные табы
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === `${tabId}-tab`) {
+                    content.classList.add('active');
+                }
+            });
+            
+            // Сохраняем выбранный таб в localStorage
+            localStorage.setItem('admin_active_tab', tabId);
+        });
+    });
+    
+    // Восстанавливаем последний активный таб
+    const savedTab = localStorage.getItem('admin_active_tab');
+    if (savedTab) {
+        const tabToActivate = document.querySelector(`.admin-tab[data-tab="${savedTab}"]`);
+        if (tabToActivate) {
+            tabToActivate.click();
+        }
+    }
+    
+    // Поиск в таблицах
+    const searchInputs = document.querySelectorAll('.search-box input');
+    searchInputs.forEach(input => {
+        input.addEventListener('input', debounce(function() {
+            const tableId = this.closest('.admin-table-container').querySelector('.admin-table');
+            if (tableId) {
+                filterTable(tableId, this.value);
+            }
+        }, 300));
+    });
+    
+    // Форма настроек
+    const settingsForm = document.getElementById('settingsForm');
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveSettings();
+        });
+    }
+    
+    // Анимация появления
+    const revealElements = document.querySelectorAll('.admin-header, .quick-actions, .admin-sidebar, .tab-content');
+    revealElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        
+        setTimeout(() => {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+
+// Утилиты
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function filterTable(table, searchTerm) {
+    const rows = table.querySelectorAll('tbody tr');
+    const term = searchTerm.toLowerCase();
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+    });
+}
+
+// Модальные окна
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Обработка сообщений
+async function viewMessage(messageId) {
+    try {
+        const response = await fetch(`/admin/message/${messageId}`);
+        const data = await response.json();
+        
+        const modal = document.getElementById('messageModal');
+        const details = document.getElementById('messageDetails');
+        
+        const formattedDate = new Date(data.created_at).toLocaleString('no-NO', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        details.innerHTML = `
+            <div style="background: var(--color-snow); padding: 1.5rem; border-radius: var(--border-radius); margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <div style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">{{ _('From') }}</div>
+                        <div style="font-weight: 600;">${data.name}</div>
+                        <a href="mailto:${data.email}" style="color: var(--color-aurora-teal);">${data.email}</a>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">{{ _('Phone') }}</div>
+                        <div>${data.phone || '{{ _("Not provided") }}'}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">{{ _('Project Type') }}</div>
+                        <div>${data.project_type || '{{ _("Not specified") }}'}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">{{ _('Date') }}</div>
+                        <div>${formattedDate}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: white; padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid #e5e7eb; margin-bottom: 1.5rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--color-midnight);">{{ _('Message') }}</h4>
+                <div style="white-space: pre-wrap; line-height: 1.6; color: var(--color-text);">${data.message}</div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-outline" onclick="markAsRead(${messageId})">
+                    <i class="fas fa-check"></i> {{ _('Mark as Read') }}
+                </button>
+                <button class="btn" onclick="replyToMessage('${data.email}')">
+                    <i class="fas fa-reply"></i> {{ _('Reply') }}
+                </button>
+                <button class="btn" style="background: #ef4444; color: white;" onclick="deleteMessage(${messageId})">
+                    <i class="fas fa-trash"></i> {{ _('Delete') }}
+                </button>
+            </div>
+        `;
+        
+        showModal('messageModal');
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('{{ _("Error loading message details") }}', 'error');
+    }
+}
+
+function replyToMessage(email) {
+    window.location.href = `mailto:${email}`;
+}
+
+async function markAsRead(messageId) {
+    try {
+        const response = await fetch(`/admin/message/${messageId}/read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            showNotification('{{ _("Message marked as read") }}', 'success');
+            hideModal('messageModal');
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('{{ _("Error updating message") }}', 'error');
+    }
+}
+
+async function deleteMessage(messageId) {
+    if (!confirm('{{ _("Are you sure you want to delete this message?") }}')) return;
+    
+    try {
+        const response = await fetch(`/admin/message/${messageId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showNotification('{{ _("Message deleted successfully") }}', 'success');
+            hideModal('messageModal');
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('{{ _("Error deleting message") }}', 'error');
+    }
+}
+
+// Управление проектами
+function editProject(projectId) {
+    showNotification(`{{ _("Opening edit form for project") }} ${projectId}`, 'info');
+    // В реальном приложении здесь будет открытие формы редактирования
+}
+
+function previewProject(projectId) {
+    window.open(`/portfolio/project/${projectId}`, '_blank');
+}
+
+async function deleteProject(projectId) {
+    if (!confirm('{{ _("Are you sure you want to delete this project? This action cannot be undone.") }}')) return;
+    
+    try {
+        const response = await fetch(`/admin/project/${projectId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showNotification('{{ _("Project deleted successfully") }}', 'success');
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('{{ _("Error deleting project") }}', 'error');
+    }
+}
+
+// Управление поставщиками
+function editSupplier(supplierId) {
+    showNotification(`{{ _("Opening edit form for supplier") }} ${supplierId}`, 'info');
+}
+
+async function deleteSupplier(supplierId) {
+    if (!confirm('{{ _("Are you sure you want to delete this supplier?") }}')) return;
+    
+    try {
+        const response = await fetch(`/admin/supplier/${supplierId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showNotification('{{ _("Supplier deleted successfully") }}', 'success');
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('{{ _("Error deleting supplier") }}', 'error');
+    }
+}
+
+// Настройки
+async function saveSettings() {
+    try {
+        const formData = new FormData(document.getElementById('settingsForm'));
+        const data = Object.fromEntries(formData);
+        
+        const response = await fetch('/admin/settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            showNotification('{{ _("Settings saved successfully") }}', 'success');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('{{ _("Error saving settings") }}', 'error');
+    }
+}
+
+// Экспорт данных
+function exportData() {
+    showNotification('{{ _("Preparing data for export...") }}', 'info');
+    
+    // В реальном приложении здесь будет генерация CSV/JSON
+    setTimeout(() => {
+        const data = {
+            messages: {{ messages_count }},
+            projects: {{ projects_count }},
+            suppliers: {{ suppliers_count }},
+            timestamp: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `oslo-arch-lab-export-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showNotification('{{ _("Data exported successfully") }}', 'success');
+    }, 1000);
+}
+
+// Выход
+function logout() {
+    if (confirm('{{ _("Are you sure you want to logout?") }}')) {
+        window.location.href = '/admin/logout';
+    }
+}
+
+// Уведомления
+function showNotification(message, type = 'info') {
+    // Удаляем существующие уведомления
+    const existingNotifications = document.querySelectorAll('.admin-notification');
+    existingNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = 'admin-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-medium);
+        z-index: 3000;
+        animation: slideIn 0.3s ease;
+        max-width: 400px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    `;
+    
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 5000);
+}
+
+// Добавляем стили для анимаций уведомлений
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Закрытие модальных окон по ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.admin-modal').forEach(modal => {
+            modal.style.display = 'none';
+        });
+        document.body.style.overflow = 'auto';
+    }
+});
+</script>
+{% endblock %}

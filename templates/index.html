@@ -1,0 +1,853 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+/* Стили для героя с фото */
+.hero {
+    position: relative;
+    height: 100vh;
+    min-height: 700px;
+    overflow: hidden;
+}
+
+.hero-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(26, 75, 109, 0.7), rgba(77, 184, 201, 0.5));
+    z-index: 2;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: white;
+    padding-top: 30vh;
+}
+
+/* Стили для 3D визуализации */
+.calc-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+@media (max-width: 992px) {
+    .calc-preview {
+        grid-template-columns: 1fr;
+    }
+}
+
+.calc-visualization {
+    background: linear-gradient(135deg, #f0f8ff, #e6f7ff);
+    border-radius: var(--border-radius);
+    height: 400px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+}
+
+#house3d-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.loading-3d {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--color-text-light);
+    z-index: 1;
+}
+
+.loading-3d i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--color-aurora-teal);
+}
+
+.calc-controls {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-soft);
+}
+
+.control-group {
+    margin-bottom: 2rem;
+}
+
+.control-group label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--color-fjord);
+}
+
+.range-slider {
+    width: 100%;
+    height: 8px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--color-ice);
+    border-radius: 4px;
+    outline: none;
+}
+
+.range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-aurora-teal);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.range-slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-aurora-teal);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.calc-result-preview {
+    background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+    color: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.calc-result-preview h3 {
+    margin: 0 0 1rem 0;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.cost-display {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 1rem 0;
+    color: white;
+}
+
+.small-text {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Герой секция с фото-фоном -->
+<section class="hero">
+    <div class="hero-image" style="background-image: url('/static/myphotos/Home.jpeg');"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content reveal">
+        <h1>{{ _('Design Your Dream Home in Oslo') }}</h1>
+        <p>{{ _('We combine Nordic aesthetics, sustainable materials, and innovative technology to create homes that harmonize with the unique Oslo landscape. From initial design to final touch.') }}</p>
+        <div class="hero-actions">
+            <a href="#services" class="btn">{{ _('Our Services') }}</a>
+            <a href="{{ url_for('calculator') }}" class="btn btn-aurora pulse">{{ _('Calculate Cost') }}</a>
+            <a href="{{ url_for('portfolio') }}" class="btn btn-outline">{{ _('View Portfolio') }}</a>
+        </div>
+    </div>
+</section>
+
+<!-- Секция услуг с интерактивным контекстом -->
+<section class="section" id="services">
+    <div class="container">
+        <h2 class="section-title reveal">{{ _('Our Services') }}</h2>
+        <div class="services-grid">
+            <div class="service-card reveal" style="transition-delay: 0.1s">
+                <i class="fas fa-drafting-compass"></i>
+                <h3>{{ _('Architectural Design') }}</h3>
+                <p>{{ _('Full-service architectural design tailored to Oslo\'s building codes and Nordic climate.') }}</p>
+            </div>
+            <div class="service-card reveal" style="transition-delay: 0.2s">
+                <i class="fas fa-home"></i>
+                <h3>{{ _('Interior Renovation') }}</h3>
+                <p>{{ _('Transform existing spaces with light, natural materials, and smart storage solutions.') }}</p>
+            </div>
+            <div class="service-card reveal" style="transition-delay: 0.3s">
+                <i class="fas fa-leaf"></i>
+                <h3>{{ _('Sustainable Solutions') }}</h3>
+                <p>{{ _('Energy-efficient systems, green roofs, and local, eco-friendly materials.') }}</p>
+            </div>
+            <div class="service-card reveal" style="transition-delay: 0.4s">
+                <i class="fas fa-truck"></i>
+                <h3>{{ _('Supplier Network') }}</h3>
+                <p>{{ _('Access to our curated network of trusted suppliers for materials and furniture in Oslo.') }}</p>
+            </div>
+            <div class="service-card reveal" style="transition-delay: 0.5s">
+                <i class="fas fa-calculator"></i>
+                <h3>{{ _('Cost Planning') }}</h3>
+                <p>{{ _('Transparent budgeting and financial planning with our interactive calculator.') }}</p>
+            </div>
+            <div class="service-card reveal" style="transition-delay: 0.6s">
+                <i class="fas fa-hard-hat"></i>
+                <h3>{{ _('Project Management') }}</h3>
+                <p>{{ _('End-to-end coordination of your project, from permits to final inspection.') }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Избранные проекты - горизонтальная галерея -->
+{% if featured_projects %}
+<section class="section" style="background: var(--color-snow);">
+    <div class="container">
+        <h2 class="section-title reveal">{{ _('Featured Projects') }}</h2>
+        <p class="text-center reveal" style="max-width: 800px; margin: 0 auto 3rem; color: var(--color-text-light);">
+            {{ _('Explore our recent work across Oslo - from modern apartments in Frogner to sustainable homes in Nordmarka.') }}
+        </p>
+        
+        <div class="horizontal-gallery">
+            {% for project in featured_projects %}
+            <div class="horizontal-item">
+                <div class="portfolio-card">
+                    <div class="portfolio-img">
+                        <div class="portfolio-overlay">
+                            <span class="project-category">{{ project.category|replace('_', ' ')|title }}</span>
+                            <span class="project-location">{{ project.location }}</span>
+                        </div>
+                        <img src="{{ project.image_url }}" alt="{{ project.title }}" loading="lazy">
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>{{ project.title }}</h3>
+                        <p>{{ project.description }}</p>
+                        <div class="project-details">
+                            <span><i class="fas fa-expand-arrows-alt"></i> {{ project.area }}</span>
+                            <span><i class="fas fa-calendar-alt"></i> {{ project.year }}</span>
+                            <span><i class="fas fa-clock"></i> {{ project.duration }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('portfolio') }}" class="btn">{{ _('View All Projects') }}</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Интерактивный превью калькулятора с 3D моделью -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title reveal">{{ _('Quick Cost Estimate') }}</h2>
+        <p class="text-center reveal" style="max-width: 700px; margin: 0 auto 3rem; color: var(--color-text-light);">
+            {{ _('Get an instant estimate for your project. Adjust the sliders to see real-time changes in the 3D model.') }}
+        </p>
+        
+        <div class="calc-preview">
+            <div class="calc-visualization">
+                <div id="house3d-container">
+                    <div class="loading-3d">
+                        <i class="fas fa-cube"></i>
+                        <p>{{ _('Loading realistic 3D visualization...') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="calc-controls">
+                <div class="control-group">
+                    <label for="areaRange">{{ _('Area (m²)') }}: <span id="areaValue">150</span></label>
+                    <input type="range" id="areaRange" class="range-slider" min="50" max="500" value="150" step="10">
+                </div>
+                
+                <div class="control-group">
+                    <label for="roomsRange">{{ _('Number of Rooms') }}: <span id="roomsValue">3</span></label>
+                    <input type="range" id="roomsRange" class="range-slider" min="1" max="10" value="3" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <label for="qualityRange">{{ _('Quality Level') }}: <span id="qualityValue">{{ _('Standard') }}</span></label>
+                    <input type="range" id="qualityRange" class="range-slider" min="1" max="3" value="2" step="1">
+                </div>
+                
+                <div class="calc-result-preview">
+                    <h3>{{ _('Estimated Cost') }}</h3>
+                    <div class="cost-display" id="previewCost">3 450 000 NOK</div>
+                    <p class="small-text">{{ _('* This is an approximate estimate. For a detailed calculation, use our full calculator.') }}</p>
+                </div>
+                
+                <a href="{{ url_for('calculator') }}" class="btn btn-aurora">
+                    {{ _('Go to Full Calculator') }} <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Блог -->
+{% if featured_posts %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title reveal">{{ _('From Our Blog') }}</h2>
+        <p class="text-center reveal" style="max-width: 700px; margin: 0 auto 3rem; color: var(--color-text-light);">
+            {{ _('Insights on architecture, sustainable design, and Oslo building trends.') }}
+        </p>
+        
+        <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+            {% for post in featured_posts %}
+            <article class="blog-card reveal" style="background: white; border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--shadow-soft); transition: var(--transition);">
+                <div class="blog-card-img" style="height: 200px; overflow: hidden;">
+                    <img src="{{ post.image_url }}" alt="{{ post.title }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                </div>
+                <div class="blog-card-content" style="padding: 2rem;">
+                    <span class="post-category" style="display: inline-block; padding: 0.25rem 1rem; background: var(--color-ice); color: var(--color-fjord); border-radius: 50px; font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem;">{{ _('Design Tips') }}</span>
+                    <h3 style="margin-bottom: 1rem;">{{ post.title }}</h3>
+                    <p class="post-excerpt" style="color: var(--color-text-light); margin-bottom: 1.5rem;">{{ post.excerpt[:120] }}...</p>
+                    <div class="post-meta" style="display: flex; justify-content: space-between; color: var(--color-text-light); font-size: 0.875rem; margin-bottom: 1.5rem;">
+                        <span><i class="fas fa-calendar"></i> {{ post.created_at.strftime('%b %d, %Y') }}</span>
+                        <span><i class="fas fa-user"></i> {{ post.author }}</span>
+                    </div>
+                    <a href="/blog/{{ post.slug }}" class="read-more" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-fjord); font-weight: 600;">
+                        {{ _('Read Article') }} <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('blog') }}" class="btn btn-aurora">{{ _('Read More Articles') }}</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA секция -->
+<section class="section" style="background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight)); color: white;">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="reveal" style="color: white; margin-bottom: 1.5rem;">{{ _('Ready to Start Your Project?') }}</h2>
+            <p class="reveal" style="max-width: 700px; margin: 0 auto 2rem; font-size: 1.2rem; opacity: 0.9;">
+                {{ _('Get a personalized estimate using our advanced cost calculator. It\'s fast, accurate, and tailored to Oslo market prices.') }}
+            </p>
+            <div class="reveal" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ url_for('calculator') }}" class="btn" style="background: white; color: var(--color-fjord);">
+                    {{ _('Go to Calculator') }} <i class="fas fa-calculator"></i>
+                </a>
+                <a href="{{ url_for('contact') }}" class="btn btn-outline" style="border-color: white; color: white;">
+                    {{ _('Contact Us') }} <i class="fas fa-envelope"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Three.js для 3D модели -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- OrbitControls для управления камерой -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+
+<script>
+// 3D МОДЕЛЬ ДОМА
+let scene, camera, renderer, house, controls;
+let currentArea = 150;
+let currentRooms = 3;
+let is3DInitialized = false;
+
+function init3D() {
+    const container = document.getElementById('house3d-container');
+    if (!container) return;
+    
+    // Удаляем loading сообщение
+    const loadingElement = container.querySelector('.loading-3d');
+    if (loadingElement) {
+        loadingElement.style.display = 'none';
+    }
+    
+    // Создаем сцену
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf0f8ff);
+    
+    // Камера
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(15, 10, 15);
+    
+    // Рендерер
+    renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        alpha: false,
+        powerPreference: "high-performance"
+    });
+    
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    // Очищаем контейнер и добавляем рендерер
+    container.innerHTML = '';
+    container.appendChild(renderer.domElement);
+    
+    // OrbitControls для управления камерой
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 5;
+    controls.maxDistance = 50;
+    
+    // Освещение
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(10, 20, 15);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+    
+    // Создаем дом
+    createSimpleRealisticHouse();
+    
+    // Анимация
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    animate();
+    
+    // Обработка изменения размера окна
+    window.addEventListener('resize', function() {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+    
+    is3DInitialized = true;
+}
+
+function createSimpleRealisticHouse() {
+    // Удаляем старый дом 
+    if (house) {
+        scene.remove(house);
+    }
+    
+    house = new THREE.Group();
+    
+    // ПАРАМЕТРЫ ДОМА
+    const area = currentArea;
+    const width = Math.sqrt(area) * 1.2;
+    const depth = Math.sqrt(area) * 0.8;
+    const wallHeight = 3.5;
+    const roofHeight = 1.8;
+    
+    // МАТЕРИАЛЫ 
+    const wallMaterial = new THREE.MeshStandardMaterial({
+        color: 0x888888,
+        roughness: 0.7,
+        metalness: 0.1
+    });
+    
+    const roofMaterial = new THREE.MeshStandardMaterial({
+        color: 0x222222,
+        roughness: 0.8,
+        metalness: 0.2
+    });
+    
+    const doorMaterial = new THREE.MeshStandardMaterial({
+        color: 0x333333,
+        roughness: 0.5,
+        metalness: 0.1
+    });
+    
+    const windowMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xaaccff,
+        transmission: 0.9,
+        roughness: 0.1,
+        transparent: true,
+        opacity: 0.8
+    });
+    
+    const foundationMaterial = new THREE.MeshStandardMaterial({
+        color: 0x666666,
+        roughness: 0.9,
+        metalness: 0
+    });
+    
+    const woodMaterial = new THREE.MeshStandardMaterial({
+        color: 0x696969,
+        roughness: 0.6,
+        metalness: 0.1
+    });
+    
+    // 1. ФУНДАМЕНТ
+    const foundationGeometry = new THREE.BoxGeometry(width + 0.5, 0.5, depth + 0.5);
+    const foundation = new THREE.Mesh(foundationGeometry, foundationMaterial);
+    foundation.position.set(0, 0.25, 0);
+    foundation.castShadow = true;
+    foundation.receiveShadow = true;
+    house.add(foundation);
+    
+    // 2. ОСНОВНОЙ ОБЪЕМ ДОМА 
+    const houseGeometry = new THREE.BoxGeometry(width, wallHeight, depth);
+    const houseBody = new THREE.Mesh(houseGeometry, wallMaterial);
+    houseBody.position.set(0, wallHeight/2 + 0.25, 0);
+    houseBody.castShadow = true;
+    houseBody.receiveShadow = true;
+    house.add(houseBody);
+    
+// 3. КРЫША
+const roofOverhang = 0.25; // 25% свес
+const roofWidth = width * (1 + roofOverhang);
+const roofDepth = depth * (1 + roofOverhang);
+
+// Создаем единый материал для всей крыши (двусторонний)
+const roofMaterialDoubleSided = roofMaterial.clone();
+roofMaterialDoubleSided.side = THREE.DoubleSide;
+
+// Создаем 4 точки для основания крыши (прямоугольник)
+const roofBase = new THREE.Shape();
+roofBase.moveTo(-roofWidth/2, -roofDepth/2);
+roofBase.lineTo(roofWidth/2, -roofDepth/2);
+roofBase.lineTo(roofWidth/2, roofDepth/2);
+roofBase.lineTo(-roofWidth/2, roofDepth/2);
+roofBase.lineTo(-roofWidth/2, -roofDepth/2);
+
+// Выдавливаем чтобы была толщина
+const roofGeometry = new THREE.ExtrudeGeometry(roofBase, {
+    depth: 0.3, // толщина крыши
+    bevelEnabled: false
+});
+
+const roofBaseMesh = new THREE.Mesh(roofGeometry, roofMaterialDoubleSided);
+roofBaseMesh.position.set(0, wallHeight + 0.25, 0);
+roofBaseMesh.rotation.x = Math.PI / 2; // кладем горизонтально
+roofBaseMesh.castShadow = true;
+roofBaseMesh.receiveShadow = true;
+house.add(roofBaseMesh);
+
+// Скаты крыши - два треугольника
+// Левый скат
+const leftRoofGeometry = new THREE.BufferGeometry();
+const leftVertices = new Float32Array([
+    -roofWidth/2, wallHeight + 0.25, -roofDepth/2,
+    -roofWidth/2, wallHeight + 0.25, roofDepth/2,
+    0, wallHeight + 0.25 + roofHeight, 0
+]);
+leftRoofGeometry.setAttribute('position', new THREE.BufferAttribute(leftVertices, 3));
+leftRoofGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0, 2, 1]), 1));
+leftRoofGeometry.computeVertexNormals();
+
+const leftRoof = new THREE.Mesh(leftRoofGeometry, roofMaterialDoubleSided);
+leftRoof.castShadow = true;
+leftRoof.receiveShadow = true;
+house.add(leftRoof);
+
+// Правый скат  
+const rightRoofGeometry = new THREE.BufferGeometry();
+const rightVertices = new Float32Array([
+    roofWidth/2, wallHeight + 0.25, -roofDepth/2,
+    0, wallHeight + 0.25 + roofHeight, 0,
+    roofWidth/2, wallHeight + 0.25, roofDepth/2
+]);
+rightRoofGeometry.setAttribute('position', new THREE.BufferAttribute(rightVertices, 3));
+rightRoofGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0, 1, 2]), 1));
+rightRoofGeometry.computeVertexNormals();
+
+const rightRoof = new THREE.Mesh(rightRoofGeometry, roofMaterialDoubleSided);
+rightRoof.castShadow = true;
+rightRoof.receiveShadow = true;
+house.add(rightRoof);
+
+// Фронтоны (торцевые треугольники)
+// Задний фронтон
+const backGableGeometry = new THREE.BufferGeometry();
+const backVertices = new Float32Array([
+    -roofWidth/2, wallHeight + 0.25, -roofDepth/2,
+    0, wallHeight + 0.25 + roofHeight, 0,
+    roofWidth/2, wallHeight + 0.25, -roofDepth/2
+]);
+backGableGeometry.setAttribute('position', new THREE.BufferAttribute(backVertices, 3));
+backGableGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0, 1, 2]), 1));
+backGableGeometry.computeVertexNormals();
+
+const backGable = new THREE.Mesh(backGableGeometry, roofMaterialDoubleSided); // ТОЖЕ ИСПОЛЬЗУЕМ roofMaterial!
+backGable.castShadow = true;
+backGable.receiveShadow = true;
+house.add(backGable);
+
+// Передний фронтон
+const frontGableGeometry = new THREE.BufferGeometry();
+const frontVertices = new Float32Array([
+    -roofWidth/2, wallHeight + 0.25, roofDepth/2,
+    roofWidth/2, wallHeight + 0.25, roofDepth/2,
+    0, wallHeight + 0.25 + roofHeight, 0
+]);
+frontGableGeometry.setAttribute('position', new THREE.BufferAttribute(frontVertices, 3));
+frontGableGeometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0, 1, 2]), 1));
+frontGableGeometry.computeVertexNormals();
+
+const frontGable = new THREE.Mesh(frontGableGeometry, roofMaterialDoubleSided); // ТОЖЕ ИСПОЛЬЗУЕМ roofMaterial!
+frontGable.castShadow = true;
+frontGable.receiveShadow = true;
+house.add(frontGable);
+
+    // 4. ТРУБА
+    const chimneyGeometry = new THREE.BoxGeometry(0.3, 2.2, 0.3);
+    const chimneyMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    const chimney = new THREE.Mesh(chimneyGeometry, chimneyMaterial);
+    chimney.position.set(width/4, wallHeight + 0.25 + 1.1, -depth/4);
+    chimney.castShadow = true;
+    house.add(chimney);
+    
+    // 5. ДВЕРЬ
+    const doorWidth = 0.9;
+    const doorHeight = 2.0;
+    const doorGeometry = new THREE.BoxGeometry(doorWidth, doorHeight, 0.15);
+    const door = new THREE.Mesh(doorGeometry, doorMaterial);
+    door.position.set(0, doorHeight/2 + 0.5, depth/2 + 0.075);
+    door.castShadow = true;
+    house.add(door);
+    
+    // Дверная коробка
+    const doorFrameGeometry = new THREE.BoxGeometry(doorWidth + 0.15, doorHeight + 0.3, 0.08);
+    const doorFrame = new THREE.Mesh(doorFrameGeometry, woodMaterial);
+    doorFrame.position.set(0, doorHeight/2 + 0.5, depth/2 + 0.115);
+    doorFrame.castShadow = true;
+    house.add(doorFrame);
+    
+    // Ручка двери
+    const handleGeometry = new THREE.SphereGeometry(0.02, 8, 8);
+    const handleMaterial = new THREE.MeshStandardMaterial({ color: 0x111111 });
+    const handle = new THREE.Mesh(handleGeometry, handleMaterial);
+    handle.position.set(doorWidth/2 - 0.08, 1.0, depth/2 + 0.16);
+    house.add(handle);
+    
+    // 6. ОКНА
+    const windowCount = Math.min(currentRooms * 2, 6);
+    
+    // Функция создания простого окна
+    function createSimpleWindow(x, y, z, isSideWindow = false) {
+        const windowGroup = new THREE.Group();
+        
+        // Рама окна
+        const frameWidth = 1.0;
+        const frameHeight = 0.9;
+        
+        // Вертикальные части рамы
+        const verticalFrameGeometry = new THREE.BoxGeometry(0.06, frameHeight, 0.06);
+        const leftFrame = new THREE.Mesh(verticalFrameGeometry, woodMaterial);
+        leftFrame.position.set(-frameWidth/2, 0, 0);
+        leftFrame.castShadow = true;
+        windowGroup.add(leftFrame);
+        
+        const rightFrame = new THREE.Mesh(verticalFrameGeometry, woodMaterial);
+        rightFrame.position.set(frameWidth/2, 0, 0);
+        rightFrame.castShadow = true;
+        windowGroup.add(rightFrame);
+        
+        // Горизонтальные части рамы
+        const horizontalFrameGeometry = new THREE.BoxGeometry(frameWidth, 0.06, 0.06);
+        const topFrame = new THREE.Mesh(horizontalFrameGeometry, woodMaterial);
+        topFrame.position.set(0, frameHeight/2, 0);
+        topFrame.castShadow = true;
+        windowGroup.add(topFrame);
+        
+        const bottomFrame = new THREE.Mesh(horizontalFrameGeometry, woodMaterial);
+        bottomFrame.position.set(0, -frameHeight/2, 0);
+        bottomFrame.castShadow = true;
+        windowGroup.add(bottomFrame);
+        
+        // Серединная перекладина
+        const middleFrame = new THREE.Mesh(verticalFrameGeometry, woodMaterial);
+        middleFrame.scale.set(1, 0.85, 1);
+        middleFrame.castShadow = true;
+        windowGroup.add(middleFrame);
+        
+        // Стекло
+        const glassWidth = (frameWidth - 0.12) / 2;
+        const glassHeight = frameHeight - 0.12;
+        const glassGeometry = new THREE.BoxGeometry(glassWidth, glassHeight, 0.01);
+        
+        const leftGlass = new THREE.Mesh(glassGeometry, windowMaterial);
+        leftGlass.position.set(-frameWidth/4, 0, 0.01);
+        leftGlass.castShadow = true;
+        windowGroup.add(leftGlass);
+        
+        const rightGlass = new THREE.Mesh(glassGeometry, windowMaterial);
+        rightGlass.position.set(frameWidth/4, 0, 0.01);
+        rightGlass.castShadow = true;
+        windowGroup.add(rightGlass);
+        
+        // Подоконник
+        const sillGeometry = new THREE.BoxGeometry(frameWidth + 0.25, 0.08, 0.15);
+        const sill = new THREE.Mesh(sillGeometry, woodMaterial);
+        sill.position.set(0, -frameHeight/2 - 0.04, 0.075);
+        sill.castShadow = true;
+        windowGroup.add(sill);
+        
+        // Позиционирование
+        windowGroup.position.set(x, y + 0.5, z);
+        if (isSideWindow) {
+            windowGroup.rotation.y = Math.PI / 2;
+        }
+        
+        return windowGroup;
+    }
+    
+    // Окна на передней стене
+    const frontWindowCount = Math.ceil(windowCount * 0.7);
+    for (let i = 0; i < frontWindowCount; i++) {
+        const spacing = width * 0.6 / (frontWindowCount + 1);
+        const xPos = (i + 1) * spacing - (width * 0.3);
+        const yPos = wallHeight * 0.5;
+        const zPos = depth/2 + 0.08;
+        
+        // Располагаем симметрично относительно двери
+        if (Math.abs(xPos) > doorWidth/2 + 0.3) {
+            const window = createSimpleWindow(xPos, yPos, zPos);
+            house.add(window);
+        }
+    }
+    
+    // Окна на боковых стенах
+    const sideWindowCount = Math.min(currentRooms, 3);
+    for (let i = 0; i < sideWindowCount; i++) {
+        const spacing = depth * 0.5 / (sideWindowCount + 1);
+        const zPos = (i + 1) * spacing - (depth * 0.25);
+        const yPos = wallHeight * 0.5;
+        
+        // Левое окно
+        const leftWindow = createSimpleWindow(-width/2 - 0.08, yPos, zPos, true);
+        house.add(leftWindow);
+        
+        // Правое окно 
+        const rightWindow = createSimpleWindow(width/2 + 0.08, yPos, zPos, true);
+        house.add(rightWindow);
+    }
+    
+    // 7. КРЫЛЬЦО
+    const porchWidth = width * 0.6;
+    const porchDepth = 1.2;
+    const porchGeometry = new THREE.BoxGeometry(porchWidth, 0.15, porchDepth);
+    const porch = new THREE.Mesh(porchGeometry, woodMaterial);
+    porch.position.set(0, 0.325, depth/2 + porchDepth/2);
+    porch.castShadow = true;
+    porch.receiveShadow = true;
+    house.add(porch);
+    
+    // Колонны крыльца
+    const columnGeometry = new THREE.CylinderGeometry(0.08, 0.08, 2.0, 8);
+    const columnCount = 2;
+    for (let i = 0; i < columnCount; i++) {
+        const spacing = porchWidth / (columnCount + 1);
+        const xPos = (i + 1) * spacing - (porchWidth/2);
+        
+        const column = new THREE.Mesh(columnGeometry, woodMaterial);
+        column.position.set(xPos, 1.1, depth/2 + 0.3);
+        column.castShadow = true;
+        house.add(column);
+    }
+    
+    // 8. ЛЕСТНИЦА
+    const stepCount = 2;
+    for (let i = 0; i < stepCount; i++) {
+        const stepWidth = porchWidth * 0.4;
+        const stepDepth = 0.25;
+        const stepHeight = 0.12;
+        
+        const stepGeometry = new THREE.BoxGeometry(stepWidth, stepHeight, stepDepth);
+        const step = new THREE.Mesh(stepGeometry, woodMaterial);
+        step.position.set(0, stepHeight/2 + 0.25 + i * stepHeight, depth/2 + porchDepth + i * stepDepth);
+        step.castShadow = true;
+        step.receiveShadow = true;
+        house.add(step);
+    }
+    
+    scene.add(house);
+}
+
+// Обновление значений ползунков
+document.getElementById('areaRange').addEventListener('input', function() {
+    const value = parseInt(this.value);
+    document.getElementById('areaValue').textContent = value;
+    currentArea = value;
+    updateCost();
+    if (is3DInitialized && house) {
+        createSimpleRealisticHouse();
+    }
+});
+
+document.getElementById('roomsRange').addEventListener('input', function() {
+    const value = parseInt(this.value);
+    document.getElementById('roomsValue').textContent = value;
+    currentRooms = value;
+    updateCost();
+    if (is3DInitialized && house) {
+        createSimpleRealisticHouse();
+    }
+});
+
+document.getElementById('qualityRange').addEventListener('input', function() {
+    const value = parseInt(this.value);
+    const qualityLabels = ['{{ _("Basic") }}', '{{ _("Standard") }}', '{{ _("Premium") }}'];
+    document.getElementById('qualityValue').textContent = qualityLabels[value - 1];
+    updateCost();
+});
+
+function updateCost() {
+    const qualityMultiplier = [0.8, 1.0, 1.3][parseInt(document.getElementById('qualityRange').value) - 1];
+    const basePricePerSqm = 23000;
+    const cost = Math.round(currentArea * basePricePerSqm * currentRooms * qualityMultiplier);
+    const formattedCost = cost.toLocaleString('no-NO') + ' NOK';
+    document.getElementById('previewCost').textContent = formattedCost;
+}
+
+// Инициализация 3D при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        init3D();
+        
+        const observer = new IntersectionObserver(function(entries) {
+            if (entries[0].isIntersecting && !is3DInitialized) {
+                init3D();
+            }
+        }, { threshold: 0.1 });
+        
+        const container = document.getElementById('house3d-container');
+        if (container) {
+            observer.observe(container);
+        }
+    }, 100);
+});
+</script>
+{% endblock %}

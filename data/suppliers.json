@@ -1,0 +1,50 @@
+[
+    {
+        "name": "Norway Woods AS",
+        "category": "Lumber & Sustainable Timber",
+        "address": "Skøyenveien 12, 0278 Oslo",
+        "phone": "+47 22 55 66 77",
+        "website": "https://norwaywoods.no",
+        "description": "Premium Norwegian timber, FSC-certified. Specializes in oak, pine, and birch for interior and exterior."
+    },
+    {
+        "name": "Fjord Stone & Tile",
+        "category": "Natural Stone & Flooring",
+        "address": "Drammensveien 145, 0277 Oslo",
+        "phone": "+47 22 44 33 22",
+        "website": "https://fjordstone.no",
+        "description": "Local slate, granite, and marble. Large selection of tiles for kitchens and bathrooms."
+    },
+    {
+        "name": "Nordic Light Windows",
+        "category": "Windows & Doors",
+        "address": "Ullevålsveien 78, 0171 Oslo",
+        "phone": "+47 22 88 99 00",
+        "website": "https://nordiclightwindows.no",
+        "description": "Energy-efficient triple-glazed windows, designed for Nordic climate. Custom sizes and finishes."
+    },
+    {
+        "name": "EcoPaint Scandinavia",
+        "category": "Paints & Finishes",
+        "address": "Grünerløkka 5, 0552 Oslo",
+        "phone": "+47 22 11 22 33",
+        "website": "https://ecopaint.no",
+        "description": "VOC-free, eco-friendly paints in Nordic color palettes. Mineral-based and mold-resistant."
+    },
+    {
+        "name": "SmartHome Norway",
+        "category": "Home Automation & Electrical",
+        "address": "Kongens gate 32, 0153 Oslo",
+        "phone": "+47 22 77 88 99",
+        "website": "https://smarthomeno.com",
+        "description": "Integrated smart home systems, lighting control, heating solutions, and security."
+    },
+    {
+        "name": "Oslo Kitchen Factory",
+        "category": "Kitchens & Cabinetry",
+        "address": "Middelthuns gate 27, 0368 Oslo",
+        "phone": "+47 22 33 44 55",
+        "website": "https://oslokitchen.no",
+        "description": "Custom-built kitchens with Scandinavian design. Plywood, laminate, and solid wood options."
+    }
+]

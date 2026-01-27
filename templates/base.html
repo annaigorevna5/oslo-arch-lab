@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('language', 'en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Oslo Arch Lab{% endblock %}</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Иконки -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Переключатель языка -->
+    <div class="global-lang-switcher">
+        {% if session.get('language', 'en') == 'en' %}
+            <a href="{{ url_for('set_language', language='no') }}" class="lang-link" data-lang="no">NO</a>
+            <span class="lang-divider">|</span>
+            <a href="{{ url_for('set_language', language='en') }}" class="lang-link active" data-lang="en">EN</a>
+        {% else %}
+            <a href="{{ url_for('set_language', language='no') }}" class="lang-link active" data-lang="no">NO</a>
+            <span class="lang-divider">|</span>
+            <a href="{{ url_for('set_language', language='en') }}" class="lang-link" data-lang="en">EN</a>
+        {% endif %}
+    </div>
+
+    <!-- Навигация -->
+    <nav class="navbar" id="mainNav">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-mountain"></i>
+                <span>OSLO</span>ARCH<span>LAB</span>
+            </a>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="{{ url_for('index') }}" class="nav-link">{{ _('Home') }}</a>
+                <a href="{{ url_for('portfolio') }}" class="nav-link">{{ _('Portfolio') }}</a>
+                <a href="{{ url_for('blog') }}" class="nav-link">{{ _('Blog') }}</a>
+                <a href="{{ url_for('calculator') }}" class="nav-link">{{ _('Cost Calculator') }}</a>
+                <a href="{{ url_for('suppliers') }}" class="nav-link">{{ _('Suppliers') }}</a>
+                <a href="{{ url_for('testimonials') }}" class="nav-link">{{ _('Testimonials') }}</a>
+                <a href="{{ url_for('about') }}" class="nav-link">{{ _('About') }}</a>
+                <a href="{{ url_for('contact') }}" class="nav-link">{{ _('Contact') }}</a>
+            </div>
+            
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Подвал -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-mountain"></i> OSLO ARCH LAB</h3>
+                <p>{{ _('Creating homes that harmonize with Oslo\'s unique landscape since 2012.') }}</p>
+            </div>
+            
+            <div class="footer-section">
+                <h4>{{ _('Contact') }}</h4>
+                <p><i class="fas fa-map-marker-alt"></i> Akershusstranda 21, 0150 Oslo</p>
+                <p><i class="fas fa-phone"></i> +47 22 33 44 55</p>
+                <p><i class="fas fa-envelope"></i> hello@osloarchlab.no</p>
+            </div>
+            
+            <div class="footer-section">
+                <h4>{{ _('Follow Us') }}</h4>
+                <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
+                <a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                <a href="#"><i class="fab fa-pinterest"></i> Pinterest</a>
+            </div>
+            
+            <div class="footer-section">
+                <h4>{{ _('Legal') }}</h4>
+                <a href="#">{{ _('Privacy Policy') }}</a>
+                <a href="#">{{ _('Terms of Service') }}</a>
+                <a href="#">{{ _('Cookie Policy') }}</a>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2023 Oslo Arch Lab. {{ _('All rights reserved.') }}</p>
+        </div>
+    </footer>
+
+    <!-- скрипт для меню -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menuToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (menuToggle && navMenu) {
+            menuToggle.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+            });
+        }
+    });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

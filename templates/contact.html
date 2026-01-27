@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('language', 'en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ _('Contact') }} - Oslo Arch Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Добавляем стили Leaflet для карты -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <style>
+        /* Все ваши оригинальные стили остаются здесь */
+        .contact-hero {
+            background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 3rem;
+        }
+        
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 4rem;
+        }
+        
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .contact-form {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--color-fjord);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-aurora-teal);
+            box-shadow: 0 0 0 3px rgba(77, 184, 201, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--color-aurora-teal), var(--color-aurora-purple));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(77, 184, 201, 0.3);
+        }
+        
+        .contact-info {
+            background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+            color: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--color-aurora-teal);
+        }
+        
+        .team-section {
+            margin-top: 4rem;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .team-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .team-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 2rem auto 1rem;
+            overflow: hidden;
+            border: 4px solid var(--color-snow);
+        }
+        
+        .team-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .team-content {
+            padding: 0 1.5rem 1.5rem;
+        }
+        
+        .team-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--color-midnight);
+        }
+        
+        .team-role {
+            color: var(--color-aurora-teal);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .team-contact {
+            color: var(--color-text-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Стили для карты */
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-soft);
+            z-index: 1;
+        }
+        
+        /* Кастомная иконка для метки */
+        .custom-marker-icon {
+            background-color: var(--color-aurora-teal);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .success-message {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        /* Дополнительные стили для карты */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: var(--shadow-soft) !important;
+        }
+        
+        .leaflet-control-zoom a {
+            background-color: white !important;
+            color: var(--color-fjord) !important;
+            border-radius: 5px !important;
+            margin: 2px !important;
+            width: 30px !important;
+            height: 30px !important;
+            line-height: 30px !important;
+        }
+        
+        .leaflet-control-zoom a:hover {
+            background-color: var(--color-snow) !important;
+        }
+        
+        /* Полностью скрываем атрибуцию */
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    {% extends "base.html" %}
+    
+    {% block content %}
+    <div class="contact-hero">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 1rem;">{{ _('Contact Us') }}</h1>
+            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto; opacity: 0.9;">
+                {{ _('Ready to transform your space? Get in touch for a free consultation. We serve Oslo and surrounding areas.') }}
+            </p>
+        </div>
+    </div>
+    
+    <div class="contact-container">
+        <div class="contact-grid">
+            <!-- Contact Form -->
+            <div class="contact-form">
+                <h2 style="color: var(--color-fjord); margin-bottom: 1.5rem;">{{ _('Send us a Message') }}</h2>
+                
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">{{ _('Full Name') }}</label>
+                        <input type="text" id="name" class="form-control" placeholder="{{ _('Your name') }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">{{ _('Email Address') }}</label>
+                        <input type="email" id="email" class="form-control" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">{{ _('Phone Number') }}</label>
+                        <input type="tel" id="phone" class="form-control" placeholder="+47 123 45 678">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="project_type">{{ _('Project Type') }}</label>
+                        <select id="project_type" class="form-control" required>
+                            <option value="">{{ _('Select project type') }}</option>
+                            <option value="architectural">{{ _('Architectural Design') }}</option>
+                            <option value="renovation">{{ _('Home Renovation') }}</option>
+                            <option value="consultation">{{ _('Consultation') }}</option>
+                            <option value="supplier">{{ _('Supplier Inquiry') }}</option>
+                            <option value="other">{{ _('Other') }}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">{{ _('Your Message') }}</label>
+                        <textarea id="message" class="form-control" placeholder="{{ _('Tell us about your project, budget, timeline...') }}" required></textarea>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="newsletter" checked>
+                        <label for="newsletter" style="font-size: 0.95rem; color: var(--color-text-light);">
+                            {{ _('Subscribe to our newsletter for design tips and offers') }}
+                        </label>
+                    </div>
+                    
+                    <p style="font-size: 0.85rem; color: var(--color-text-light); margin-top: 1rem;">
+                        <i class="fas fa-shield-alt" style="margin-right: 0.5rem;"></i>
+                        {{ _('Your information is safe with us. We never share your data.') }}
+                    </p>
+                    
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-paper-plane"></i> {{ _('Send Message') }}
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="contact-info">
+                <h2 style="color: white; margin-bottom: 1.5rem;">{{ _('Visit Our Studio') }}</h2>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <h3 style="color: white; margin-bottom: 0.5rem;">{{ _('Address') }}</h3>
+                        <p>Akershusstranda 21<br>0150 Oslo, Norway</p>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <h3 style="color: white; margin-bottom: 0.5rem;">{{ _('Business Hours') }}</h3>
+                        <p><strong>{{ _('Monday-Friday') }}:</strong> 9:00 - 17:00<br>
+                        <strong>{{ _('Saturday') }}:</strong> 10:00 - 15:00<br>
+                        <strong>{{ _('Sunday') }}:</strong> {{ _('Closed') }}</p>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div>
+                        <h3 style="color: white; margin-bottom: 0.5rem;">{{ _('Contact Details') }}</h3>
+                        <p><strong>{{ _('Phone') }}:</strong> +47 22 33 44 55<br>
+                        <strong>{{ _('Email') }}:</strong> hello@osloarchlab.no<br>
+                        <strong>{{ _('Live Chat') }}:</strong> {{ _('Available during business hours') }}</p>
+                    </div>
+                </div>
+                
+                <!-- Интерактивная карта -->
+                <div id="map"></div>
+            </div>
+        </div>
+        
+        <!-- Team Section -->
+        <div class="team-section">
+            <h2 style="text-align: center; color: var(--color-fjord); margin-bottom: 1rem;">{{ _('Our Contact Team') }}</h2>
+            <p style="text-align: center; max-width: 600px; margin: 0 auto 2rem; color: var(--color-text-light);">
+                {{ _('Meet our team members who are ready to assist you with your project inquiries.') }}
+            </p>
+            
+            <div class="team-grid">
+                <!-- Team Member 1 -->
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                             alt="Mikael Johansen">
+                    </div>
+                    <div class="team-content">
+                        <div class="team-name">{{ _('Mikael Johansen') }}</div>
+                        <div class="team-role">{{ _('Founder & Lead Architect') }}</div>
+                        <p class="team-contact">
+                            <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>
+                            mikael@osloarchlab.no
+                        </p>
+                        <p class="team-contact">
+                            <i class="fas fa-phone" style="margin-right: 0.5rem;"></i>
+                            +47 22 33 44 56
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Team Member 2 -->
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                             alt="Marta Larsen">
+                    </div>
+                    <div class="team-content">
+                        <div class="team-name">{{ _('Marta Larsen') }}</div>
+                        <div class="team-role">{{ _('Client Relations Manager') }}</div>
+                        <p class="team-contact">
+                            <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>
+                            marta@osloarchlab.no
+                        </p>
+                        <p class="team-contact">
+                            <i class="fas fa-phone" style="margin-right: 0.5rem;"></i>
+                            +47 22 33 44 57
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Team Member 3 -->
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                             alt="Erik Solberg">
+                    </div>
+                    <div class="team-content">
+                        <div class="team-name">{{ _('Erik Solberg') }}</div>
+                        <div class="team-role">{{ _('Project Manager') }}</div>
+                        <p class="team-contact">
+                            <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>
+                            erik@osloarchlab.no
+                        </p>
+                        <p class="team-contact">
+                            <i class="fas fa-phone" style="margin-right: 0.5rem;"></i>
+                            +47 22 33 44 58
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Team Member 4 -->
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                             alt="Ingrid Olsen">
+                    </div>
+                    <div class="team-content">
+                        <div class="team-name">{{ _('Ingrid Olsen') }}</div>
+                        <div class="team-role">{{ _('Design Consultant') }}</div>
+                        <p class="team-contact">
+                            <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>
+                            ingrid@osloarchlab.no
+                        </p>
+                        <p class="team-contact">
+                            <i class="fas fa-phone" style="margin-right: 0.5rem;"></i>
+                            +47 22 33 44 59
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Message -->
+    <div class="success-message" id="success-message">
+        <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>
+        <span id="message-text"></span>
+    </div>
+    
+    <!-- Добавляем скрипт Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contactForm = document.getElementById('contactForm');
+        const successMessage = document.getElementById('success-message');
+        const messageText = document.getElementById('message-text');
+        
+        // Инициализация карты
+        function initMap() {
+            //координаты для Akershusstranda 21, 0150 Oslo, Norway
+            const officeCoords = [59.9075, 10.7350];
+            
+            // Создаем карту
+            const map = L.map('map').setView(officeCoords, 17);
+            
+            // Используем карту OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '', // Пустая строка - убираем весь текст
+                maxZoom: 19,
+            }).addTo(map);
+            
+            // Создаем кастомную иконку
+            const customIcon = L.divIcon({
+                className: 'custom-marker-icon',
+                html: '<i class="fas fa-building"></i>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+            
+            // Добавляем маркер с кастомной иконкой
+            const marker = L.marker(officeCoords, {icon: customIcon}).addTo(map);
+            
+            // Добавляем попап с информацией
+            marker.bindPopup(`
+                <div style="font-family: inherit; padding: 8px;">
+                    <h3 style="margin: 0 0 8px 0; color: var(--color-fjord); font-size: 1.1rem; font-weight: 700;">
+                        <i class="fas fa-building" style="color: var(--color-aurora-teal); margin-right: 5px;"></i>
+                        Oslo Arch Lab Studio
+                    </h3>
+                    <p style="margin: 0 0 6px 0; font-size: 0.9rem; line-height: 1.4;">
+                        <strong>Akershusstranda 21</strong><br>
+                        0150 Oslo, Norway
+                    </p>
+                    <hr style="margin: 8px 0; border: none; border-top: 1px solid #eee;">
+                    <p style="margin: 0; font-size: 0.8rem; color: #666;">
+                        <i class="fas fa-info-circle" style="color: var(--color-aurora-teal); margin-right: 4px;"></i>
+                        Located on the Oslo fjord waterfront
+                    </p>
+                </div>
+            `).openPopup();
+            
+            // Добавляем контролы для масштабирования
+            L.control.zoom({
+                position: 'topright'
+            }).addTo(map);
+            
+            // отключаем атрибуцию
+            map.attributionControl.setPrefix('');
+            
+            setTimeout(() => {
+                map.invalidateSize();
+                map.setView(officeCoords, 17);
+            }, 100);
+        }
+        
+        // Инициализируем карту после загрузки страницы
+        setTimeout(() => {
+            initMap();
+        }, 300);
+        
+        // Обработка формы
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                project_type: document.getElementById('project_type').value,
+                message: document.getElementById('message').value,
+                newsletter: document.getElementById('newsletter').checked
+            };
+            
+            showSuccessMessage('{{ _("Message Sent!") }} {{ _("Thank you for contacting Oslo Arch Lab. We will get back to you within 24 hours.") }}');
+            contactForm.reset();
+        });
+        
+        function showSuccessMessage(text) {
+            messageText.textContent = text;
+            successMessage.classList.add('show');
+            
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 5000);
+        }
+    });
+    </script>
+    {% endblock %}
+</body>
+</html>

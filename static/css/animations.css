@@ -1,0 +1,260 @@
+
+/* 1. ПЛАВНОЕ ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-left {
+    opacity: 0;
+    transform: translateX(-50px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-left.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reveal-right {
+    opacity: 0;
+    transform: translateX(50px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-right.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* 2. АНИМАЦИИ ЗАГРУЗКИ */
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--color-snow);
+    border-top: 3px solid var(--color-aurora-teal);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 3. ПУЛЬСИРУЮЩИЕ ЭЛЕМЕНТЫ */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(77, 184, 201, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(77, 184, 201, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(77, 184, 201, 0);
+    }
+}
+
+.pulse-slow {
+    animation: pulse-slow 3s infinite;
+}
+
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* 4. ПЛАВАЮЩИЕ ЭЛЕМЕНТЫ */
+.float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes float-slow {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.float-fast {
+    animation: float-fast 3s ease-in-out infinite;
+}
+
+@keyframes float-fast {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* 5. ВОЛНЫ */
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,160L48,170.7C96,181,192,203,288,192C384,181,480,139,576,138.7C672,139,768,181,864,181.3C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+    animation: wave 20s linear infinite;
+}
+
+@keyframes wave {
+    0% {
+        background-position-x: 0;
+    }
+    100% {
+        background-position-x: 1440px;
+    }
+}
+
+/* 6. ПЕРЕЛИВЫ ЦВЕТА */
+.aurora-gradient {
+    background: linear-gradient(-45deg, 
+        var(--color-aurora-purple), 
+        var(--color-aurora-teal), 
+        var(--color-fjord), 
+        var(--color-pine));
+    background-size: 400% 400%;
+    animation: aurora 15s ease infinite;
+}
+
+@keyframes aurora {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* 7. МОРФИНГ */
+.morph {
+    animation: morph 8s ease-in-out infinite;
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+@keyframes morph {
+    0% {
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    }
+    50% {
+        border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    }
+    100% {
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    }
+}
+
+/* 8. ТИПОГРАФИЧЕСКИЕ АНИМАЦИИ */
+.typing {
+    overflow: hidden;
+    border-right: 3px solid var(--color-aurora-teal);
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--color-aurora-teal) }
+}
+
+/* 9. ПАРАЛЛАКС */
+.parallax {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* 10. ПЕРЕХОДЫ МЕЖДУ СТРАНИЦАМИ */
+.page-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-fjord);
+    z-index: 9999;
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-transition.active {
+    transform: scaleY(1);
+    transform-origin: top;
+}
+
+/* 11. АНИМАЦИЯ СВЕТЛЯЧКОВ */
+.firefly {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--color-aurora-teal);
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: firefly 8s infinite;
+}
+
+@keyframes firefly {
+    0%, 100% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 0;
+        transform: translate(100px, -100px);
+    }
+}
+
+/* 12. ЗАГРУЗКА ТЕКСТА */
+.loading-text span {
+    display: inline-block;
+    animation: loading-text 1.4s infinite;
+}
+
+.loading-text span:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.loading-text span:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+@keyframes loading-text {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}

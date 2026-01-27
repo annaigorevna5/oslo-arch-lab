@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('language', 'en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ _('About Us') }} - Oslo Arch Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .about-hero {
+            background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 3rem;
+        }
+        
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 4rem;
+        }
+        
+        .story-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+        
+        @media (max-width: 768px) {
+            .story-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .story-image {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .story-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+        
+        .value-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.3s ease;
+        }
+        
+        .value-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .value-icon {
+            font-size: 2.5rem;
+            color: var(--color-aurora-teal);
+            margin-bottom: 1rem;
+        }
+        
+        .team-section {
+            margin: 4rem 0;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .team-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .team-image {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .team-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .team-content {
+            padding: 1.5rem;
+        }
+        
+        .team-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--color-midnight);
+        }
+        
+        .team-role {
+            color: var(--color-aurora-teal);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .team-bio {
+            color: var(--color-text-light);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .team-social {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .team-social a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-snow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-fjord);
+            transition: all 0.3s ease;
+        }
+        
+        .team-social a:hover {
+            background: var(--color-aurora-teal);
+            color: white;
+        }
+        
+        .certifications {
+            background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+            color: white;
+            padding: 3rem;
+            border-radius: 20px;
+            margin-top: 4rem;
+        }
+        
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .cert-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .cert-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .cert-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--color-aurora-teal);
+        }
+        
+        .contact-cta {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 3rem;
+            background: linear-gradient(135deg, var(--color-aurora-teal), var(--color-aurora-purple));
+            color: white;
+            border-radius: 20px;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: white;
+            color: var(--color-fjord);
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    {% extends "base.html" %}
+    
+    {% block content %}
+    <div class="about-hero">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 1rem;">{{ _('About Nordic Dwelling') }}</h1>
+            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto; opacity: 0.9;">
+                {{ _('We create homes that celebrate Nordic light, nature, and craftsmanship. Based in Oslo, we specialize in sustainable architecture and thoughtful renovation.') }}
+            </p>
+        </div>
+    </div>
+    
+    <div class="about-container">
+        <!-- Our Story -->
+        <div class="story-section">
+            <div class="story-image">
+               <img src="/pictures/about.jpeg">
+            </div>
+            <div class="story-content">
+                <h2 style="color: var(--color-fjord); margin-bottom: 1.5rem;">{{ _('Our Story') }}</h2>
+                <p style="margin-bottom: 1.5rem; line-height: 1.6;">
+                    {{ _('Founded in 2008 by architects with deep roots in Oslo, Nordic Dwelling began with a simple vision: to create homes that feel connected to their environment while meeting modern needs.') }}
+                </p>
+                <p style="line-height: 1.6;">
+                    {{ _('What started as a small studio has grown into a multidisciplinary team of architects, designers, and project managers who share a passion for sustainable design and Norwegian building traditions.') }}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Our Values -->
+        <h2 style="text-align: center; color: var(--color-fjord); margin-bottom: 2rem;">{{ _('Our Values') }}</h2>
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon"><i class="fas fa-leaf"></i></div>
+                <h3>{{ _('Sustainability') }}</h3>
+                <p>{{ _('We prioritize eco-friendly materials and energy-efficient design in every project.') }}</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon"><i class="fas fa-eye"></i></div>
+                <h3>{{ _('Transparency') }}</h3>
+                <p>{{ _('Clear communication, honest pricing, and no hidden fees.') }}</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon"><i class="fas fa-lightbulb"></i></div>
+                <h3>{{ _('Innovation') }}</h3>
+                <p>{{ _('Combining traditional craftsmanship with modern technology and smart home solutions.') }}</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <h3>{{ _('Local Focus') }}</h3>
+                <p>{{ _('We work with Oslo-based suppliers and understand local building regulations.') }}</p>
+            </div>
+        </div>
+        
+        <!-- Our Team -->
+        <div class="team-section">
+            <h2 style="text-align: center; color: var(--color-fjord); margin-bottom: 1rem;">{{ _('Our Team') }}</h2>
+            <p style="text-align: center; max-width: 600px; margin: 0 auto 2rem; color: var(--color-text-light);">
+                {{ _('Meet the passionate professionals behind Nordic Dwelling. Each team member brings unique expertise to create exceptional homes in Oslo.') }}
+            </p>
+            
+            <div class="team-grid">
+                <!-- Team Member 1 - NEW PERSON -->
+                <div class="team-card">
+                    <div class="team-image">
+                       <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Kristoffer Nilsen">
+                    </div>
+                    <div class="team-content">
+                        <div class="team-name">{{ _('Kristoffer Nilsen') }}</div>
+                        <div class="team-role">{{ _('Founder & Lead Architect') }}</div>
+                        <p class="team-bio">
+                            {{ _('18+ years in Oslo architecture. Specializes in sustainable residential design and passive house technology.') }}
+                        </p>
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Team Member 2 - NEW PERSON -->
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Ingrid Larsen">
+                    </div>
+                    <div class="team-content">
+                        <div class="team-name">{{ _('Ingrid Larsen') }}</div>
+                        <div class="team-role">{{ _('Interior Design Director') }}</div>
+                        <p class="team-bio">
+                            {{ _('Expert in Scandinavian interior design and material selection. Passionate about creating functional, beautiful spaces.') }}
+                        </p>
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Team Member 3 - NEW PERSON -->
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Anders Berg">
+                    </div>
+                    <div class="team-content">
+                        <div class="team-name">{{ _('Anders Berg') }}</div>
+                        <div class="team-role">{{ _('Project Manager') }}</div>
+                        <p class="team-bio">
+                            {{ _('Manages construction timelines and coordinates with local contractors. 12+ years experience in Oslo construction.') }}
+                        </p>
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Team Member 4 - NEW PERSON -->
+                <div class="team-card">
+                    <div class="team-image">
+                        <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Sofia Hansen">
+                    </div>
+                    <div class="team-content">
+                        <div class="team-name">{{ _('Sofia Hansen') }}</div>
+                        <div class="team-role">{{ _('Sustainability Consultant') }}</div>
+                        <p class="team-bio">
+                            {{ _('Ensures all projects meet green building standards and energy efficiency goals. LEED and BREEAM certified.') }}
+                        </p>
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Certifications -->
+        <div class="certifications">
+            <h2 style="color: white; text-align: center; margin-bottom: 1rem;">{{ _('Certifications & Memberships') }}</h2>
+            <p style="text-align: center; opacity: 0.9; margin-bottom: 2rem;">
+                {{ _('Our commitment to quality and sustainability is recognized by leading industry organizations.') }}
+            </p>
+            
+            <div class="cert-grid">
+                <div class="cert-item">
+                    <div class="cert-icon"><i class="fas fa-certificate"></i></div>
+                    <h4>{{ _('Sustainable building certification') }}</h4>
+                </div>
+                <div class="cert-item">
+                    <div class="cert-icon"><i class="fas fa-landmark"></i></div>
+                    <h4>{{ _('Norwegian Association of Architects') }}</h4>
+                </div>
+                <div class="cert-item">
+                    <div class="cert-icon"><i class="fas fa-award"></i></div>
+                    <h4>{{ _('Sustainable construction standards') }}</h4>
+                </div>
+                <div class="cert-item">
+                    <div class="cert-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h4>{{ _('Construction industry guarantee') }}</h4>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact CTA -->
+        <div class="contact-cta">
+            <h2 style="color: white; margin-bottom: 1rem;">{{ _('Contact Us Today') }}</h2>
+            <p style="margin-bottom: 1.5rem; opacity: 0.9;">
+                {{ _('Schedule a free consultation to discuss your vision and learn how we can help bring it to life.') }}
+            </p>
+            <a href="{{ url_for('contact') }}" class="cta-btn">
+                <i class="fas fa-calendar-alt" style="margin-right: 0.5rem;"></i>
+                {{ _('Schedule Consultation') }}
+            </a>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>

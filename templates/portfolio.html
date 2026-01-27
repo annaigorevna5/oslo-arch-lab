@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('language', 'en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ _('Portfolio') }} - Oslo Arch Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .portfolio-hero {
+            background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 3rem;
+        }
+        
+        .portfolio-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem 4rem;
+        }
+        
+        .portfolio-filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            color: var(--color-text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--color-fjord);
+            color: white;
+            border-color: var(--color-fjord);
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .project-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .project-image {
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .project-card:hover .project-image img {
+            transform: scale(1.05);
+        }
+        
+        .project-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .project-category,
+        .project-year {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .project-category {
+            background: var(--color-aurora-teal);
+            color: white;
+        }
+        
+        .project-content {
+            padding: 1.5rem;
+        }
+        
+        .project-content h3 {
+            margin-bottom: 0.75rem;
+            color: var(--color-midnight);
+        }
+        
+        .project-content p {
+            color: var(--color-text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .project-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .detail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .detail i {
+            color: var(--color-aurora-teal);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .detail span {
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+        }
+        
+        .portfolio-stats {
+            margin-top: 4rem;
+            padding: 3rem;
+            background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        
+        .stat-item h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-aurora-teal);
+        }
+        
+        @media (max-width: 768px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .project-details {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% extends "base.html" %}
+    
+    {% block content %}
+    <div class="portfolio-hero">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 1rem;">{{ _('Our Portfolio') }}</h1>
+            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto; opacity: 0.9;">
+                {{ _('Explore our completed projects in Oslo and surrounding areas. Each project reflects our commitment to Nordic design principles.') }}
+            </p>
+        </div>
+    </div>
+    
+    <div class="portfolio-container">
+        <div class="portfolio-filters">
+            <button class="filter-btn active" data-filter="all">{{ _('All Projects') }}</button>
+            <button class="filter-btn" data-filter="residential">{{ _('Residential') }}</button>
+            <button class="filter-btn" data-filter="commercial">{{ _('Commercial') }}</button>
+            <button class="filter-btn" data-filter="renovation">{{ _('Renovation') }}</button>
+            <button class="filter-btn" data-filter="new-build">{{ _('New Build') }}</button>
+        </div>
+        
+        <div class="projects-grid">
+            <!-- Project 1 -->
+            <div class="project-card" data-category="residential new-build">
+                <div class="project-image">
+                   <img src="/static/myphotos/1 portfolio Moderne villa i Frogner.jpeg">
+                         alt="Modern Villa in Frogner">
+                    <div class="project-overlay">
+                        <span class="project-category">{{ _('Residential') }}</span>
+                        <span class="project-year">2023</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>{{ _('Modern Villa in Frogner') }}</h3>
+                    <p>{{ _('A contemporary family home with sustainable materials and smart home integration.') }}</p>
+                    <div class="project-details">
+                        <div class="detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ _('Frogner, Oslo') }}</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>240 m²</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ _('10 months') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project 2 -->
+            <div class="project-card" data-category="residential renovation">
+                <div class="project-image">
+                    <img src="/static/myphotos/2 portfolio Loftleilighet renovering.jpeg">
+                         alt="Loft Apartment Renovation">
+                    <div class="project-overlay">
+                        <span class="project-category">{{ _('Renovation') }}</span>
+                        <span class="project-year">2023</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>{{ _('Loft Apartment Renovation') }}</h3>
+                    <p>{{ _('Complete transformation of a 1920s apartment with open-plan living and industrial elements.') }}</p>
+                    <div class="project-details">
+                        <div class="detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ _('Grünerløkka, Oslo') }}</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>85 m²</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ _('4 months') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project 3 -->
+            <div class="project-card" data-category="commercial">
+                <div class="project-image">
+                    <img src="/static/myphotos/3 portfolio Teknologikontor interiør.jpeg">
+                         alt="Tech Office Interior">
+                    <div class="project-overlay">
+                        <span class="project-category">{{ _('Commercial') }}</span>
+                        <span class="project-year">2022</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>{{ _('Tech Office Interior') }}</h3>
+                    <p>{{ _('Scandinavian-inspired workspace with collaborative areas and ergonomic design.') }}</p>
+                    <div class="project-details">
+                        <div class="detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ _('Majorstuen, Oslo') }}</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>450 m²</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ _('6 months') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project 4 -->
+            <div class="project-card" data-category="residential new-build">
+                <div class="project-image">3 portfolio Teknologikontor interiør
+                    <img src="/static/myphotos/4 portfolio Strandsted sommerhus.jpeg">
+                         alt="Waterfront Summer House">
+                    <div class="project-overlay">
+                        <span class="project-category">{{ _('Residential') }}</span>
+                        <span class="project-year">2022</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>{{ _('Waterfront Summer House') }}</h3>
+                    <p>{{ _('Energy-efficient design with panoramic views of the Oslofjord.') }}</p>
+                    <div class="project-details">
+                        <div class="detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ _('Bygdøy, Oslo') }}</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>180 m²</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ _('8 months') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project 5 -->
+            <div class="project-card" data-category="commercial">
+                <div class="project-image">
+                    <img src="/static/myphotos/5 portfolio  Nordisk restaurantinteriør.jpeg">
+                         alt="Nordic Restaurant Interior">
+                    <div class="project-overlay">
+                        <span class="project-category">{{ _('Commercial') }}</span>
+                        <span class="project-year">2023</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>{{ _('Nordic Restaurant Interior') }}</h3>
+                    <p>{{ _('Warm, inviting space featuring local materials and custom lighting.') }}</p>
+                    <div class="project-details">
+                        <div class="detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ _('Aker Brygge, Oslo') }}</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>320 m²</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ _('5 months') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project 6 -->
+            <div class="project-card" data-category="residential renovation">
+                <div class="project-image">
+                    <img src="/static/myphotos/6 portfolio Luksus kjøkkenrenovering.jpeg">
+                         alt="Luxury Kitchen Renovation">
+                    <div class="project-overlay">
+                        <span class="project-category">{{ _('Renovation') }}</span>
+                        <span class="project-year">2023</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>{{ _('Luxury Kitchen Renovation') }}</h3>
+                    <p>{{ _('Modern kitchen with custom cabinetry, premium appliances, and smart storage solutions.') }}</p>
+                    <div class="project-details">
+                        <div class="detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ _('St. Hanshaugen, Oslo') }}</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>45 m²</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ _('3 months') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project 7 -->
+            <div class="project-card" data-category="residential new-build">
+                <div class="project-image">
+                 <img src="/static/myphotos/7 portfolio Miljøvennlig familiehjem.jpeg">
+                         alt="Eco-Friendly Family Home">
+                    <div class="project-overlay">
+                        <span class="project-category">{{ _('New Build') }}</span>
+                        <span class="project-year">2022</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>{{ _('Eco-Friendly Family Home') }}</h3>
+                    <p>{{ _('Passive house design with solar panels, geothermal heating, and rainwater harvesting.') }}</p>
+                    <div class="project-details">
+                        <div class="detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ _('Nordstrand, Oslo') }}</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>280 m²</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ _('12 months') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project 8 -->
+            <div class="project-card" data-category="residential renovation">
+                <div class="project-image">
+                    <img src="/static/myphotos/8 portfolio Fullstendig hjemmerenovering.jpeg">
+                         alt="Complete Home Renovation">
+                    <div class="project-overlay">
+                        <span class="project-category">{{ _('Renovation') }}</span>
+                        <span class="project-year">2023</span>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3>{{ _('Complete Home Renovation') }}</h3>
+                    <p>{{ _('Full interior update including floors, walls, lighting, and custom built-in storage.') }}</p>
+                    <div class="project-details">
+                        <div class="detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ _('Ullern, Oslo') }}</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>120 m²</span>
+                        </div>
+                        <div class="detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ _('2 months') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="portfolio-stats">
+            <h2 style="color: white; margin-bottom: 2rem;">{{ _('Our Portfolio in Numbers') }}</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>89</h3>
+                    <p>{{ _('Projects Completed') }}</p>
+                </div>
+                <div class="stat-item">
+                    <h3>12+</h3>
+                    <p>{{ _('Years Experience') }}</p>
+                </div>
+                <div class="stat-item">
+                    <h3>98%</h3>
+                    <p>{{ _('Client Satisfaction') }}</p>
+                </div>
+                <div class="stat-item">
+                    <h3>45</h3>
+                    <p>{{ _('Sustainable Projects') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectCards = document.querySelectorAll('.project-card');
+        
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update active button
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                
+                // Filter projects
+                projectCards.forEach(card => {
+                    if (filter === 'all') {
+                        card.style.display = 'block';
+                    } else {
+                        const categories = card.dataset.category.split(' ');
+                        if (categories.includes(filter)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+    });
+    </script>
+    {% endblock %}
+</body>
+</html>

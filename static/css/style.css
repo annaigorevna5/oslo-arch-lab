@@ -1,0 +1,751 @@
+
+/* 1. ПЕРЕМЕННЫЕ */
+:root {
+    /* Основные цвета */
+    --color-fjord: #1a4b6d;
+    --color-midnight: #0a1a2a;
+    --color-ice: #e6f7ff;
+    --color-granite: #3a506b;
+    --color-pine: #2d5a3d;
+    --color-moss: #5a7c65;
+    --color-aurora-purple: #8a6bb8;
+    --color-aurora-teal: #4db8c9;
+    --color-birch: #f5f0e6;
+    --color-snow: #f8fafc;
+    --color-stone: #94a3b8;
+    
+    /* Текст */
+    --color-text: #1e293b;
+    --color-text-light: #64748b;
+    --color-text-on-dark: #e2e8f0;
+    
+    /* Фоны */
+    --color-background: #ffffff;
+    --color-surface: #f1f5f9;
+    
+    /* Эффекты */
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 10px 40px rgba(0, 0, 0, 0.08);
+    --shadow-strong: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    --shadow-glow: 0 0 30px rgba(77, 184, 201, 0.2);
+    --border-radius-sm: 8px;
+    --border-radius: 16px;
+    --border-radius-lg: 24px;
+    --transition-fast: all 0.2s ease;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Максимальные ширины */
+    --max-width-sm: 640px;
+    --max-width-md: 768px;
+    --max-width-lg: 1024px;
+    --max-width-xl: 1280px;
+    --max-width-2xl: 1536px;
+}
+
+/* 2. БАЗОВЫЕ СТИЛИ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+h1 { font-size: 3.5rem; }
+h2 { font-size: 2.5rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.25rem; }
+
+p {
+    margin-bottom: 1.5rem;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.container {
+    width: 100%;
+    max-width: var(--max-width-xl);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* 3. УТИЛИТЫ */
+.text-gradient {
+    background: linear-gradient(90deg, var(--color-fjord), var(--color-aurora-teal));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, var(--color-fjord), var(--color-midnight));
+}
+
+/* 4. КНОПКИ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--color-fjord), var(--color-granite));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: var(--shadow-soft);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(135deg, var(--color-aurora-teal), var(--color-aurora-purple));
+    transition: width 0.4s ease;
+    z-index: -1;
+}
+
+.btn:hover::before {
+    width: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-aurora {
+    background: linear-gradient(135deg, var(--color-aurora-purple), var(--color-aurora-teal));
+}
+
+.btn-aurora::before {
+    background: linear-gradient(135deg, var(--color-pine), var(--color-fjord));
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--color-fjord);
+    color: var(--color-fjord);
+}
+
+.btn-outline::before {
+    background: var(--color-fjord);
+}
+
+.btn-outline:hover {
+    color: white;
+}
+
+/* 5. НАВИГАЦИЯ */
+.global-lang-switcher {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 1001;
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    box-shadow: var(--shadow-soft);
+}
+
+.lang-link {
+    font-weight: 600;
+    font-size: 0.875rem;
+    opacity: 0.6;
+    transition: var(--transition-fast);
+}
+
+.lang-link.active {
+    opacity: 1;
+    color: var(--color-fjord);
+}
+
+.lang-link:hover {
+    opacity: 0.9;
+}
+
+.lang-divider {
+    opacity: 0.3;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 1.5rem 0;
+    transition: var(--transition);
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 1rem 0;
+    box-shadow: var(--shadow-soft);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: var(--max-width-xl);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-midnight);
+}
+
+.logo i {
+    color: var(--color-aurora-teal);
+    font-size: 1.8rem;
+}
+
+.logo span {
+    color: var(--color-fjord);
+}
+
+.nav-menu {
+    display: flex;
+    gap: 2.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--color-aurora-purple), var(--color-aurora-teal));
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-midnight);
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+/* 6. ГЛАВНАЯ СТРАНИЦА */
+/* Герой секция */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding-top: 5rem;
+}
+
+.hero-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(26, 75, 109, 0.9) 0%, rgba(10, 26, 42, 0.7) 100%);
+    z-index: -1;
+}
+
+.hero-content {
+    max-width: 50rem;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-strong);
+    margin-left: 10%;
+    animation: fadeUp 1s ease;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(90deg, var(--color-fjord), var(--color-aurora-purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Секция услуг */
+.section {
+    padding: 5rem 0;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 4rem;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 6rem;
+    height: 4px;
+    background: linear-gradient(to right, var(--color-aurora-purple), var(--color-aurora-teal));
+    margin: 1rem auto 0;
+    border-radius: 2px;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.service-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, var(--color-aurora-purple), var(--color-aurora-teal));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover::before {
+    transform: scaleX(1);
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-medium);
+}
+
+.service-card i {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, var(--color-fjord), var(--color-aurora-teal));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.service-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Горизонтальная галерея */
+.horizontal-gallery {
+    display: flex;
+    overflow-x: auto;
+    gap: 2rem;
+    padding: 2rem 0;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-aurora-teal) var(--color-snow);
+}
+
+.horizontal-gallery::-webkit-scrollbar {
+    height: 8px;
+}
+
+.horizontal-gallery::-webkit-scrollbar-track {
+    background: var(--color-snow);
+    border-radius: 10px;
+}
+
+.horizontal-gallery::-webkit-scrollbar-thumb {
+    background: var(--color-aurora-teal);
+    border-radius: 10px;
+}
+
+.horizontal-item {
+    flex: 0 0 auto;
+    width: 80vw;
+    max-width: 600px;
+    scroll-snap-align: start;
+    transition: var(--transition);
+}
+
+.horizontal-item:hover {
+    transform: scale(1.02);
+}
+
+/* Превью калькулятора */
+.calc-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin: 4rem 0;
+}
+
+.calc-visualization {
+    height: 300px;
+    background: linear-gradient(135deg, var(--color-snow), #e9ecef);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.calc-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.control-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-midnight);
+}
+
+.range-slider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    background: linear-gradient(to right, var(--color-aurora-teal), var(--color-aurora-purple));
+    border-radius: 3px;
+    outline: none;
+}
+
+.range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--color-fjord);
+    cursor: pointer;
+    box-shadow: var(--shadow-medium);
+}
+
+/* 7. ФУТЕР */
+.footer {
+    background: linear-gradient(135deg, var(--color-midnight), var(--color-fjord));
+    color: var(--color-text-on-dark);
+    padding: 4rem 0 2rem;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    max-width: var(--max-width-xl);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.footer-section h3,
+.footer-section h4 {
+    color: white;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.footer-section h3 i,
+.footer-section h4 i {
+    color: var(--color-aurora-teal);
+}
+
+.footer-section a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    color: #cbd5e1;
+    transition: var(--transition-fast);
+}
+
+.footer-section a:hover {
+    color: var(--color-aurora-teal);
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+/* 8. АДАПТИВНОСТЬ */
+@media (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+    
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2 {
+        font-size: 2rem;
+    }
+    
+    .nav-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        padding: 6rem 2rem 2rem;
+        gap: 1.5rem;
+        transition: right 0.3s ease;
+        z-index: 999;
+    }
+    
+    .nav-menu.active {
+        right: 0;
+    }
+    
+    .menu-toggle {
+        display: block;
+        z-index: 1000;
+    }
+    
+    .hero-content {
+        margin: 1rem;
+        padding: 2rem;
+    }
+    
+    .calc-preview {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .horizontal-item {
+        width: 85vw;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: var(--max-width-lg);
+    }
+}
+
+/* 9. АНИМАЦИИ */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* 1. Добавляем отступ для body */
+body {
+    padding-top: 120px !important; 
+}
+
+/* 2. Делаем шапку фиксированной */
+.navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000 !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    box-shadow: var(--shadow-soft) !important;
+    transition: var(--transition) !important;
+    padding: 1rem 0 !important; 
+}
+
+/* 4. Отступ для героя (первой секции) */
+.hero {
+    padding-top: 2rem !important; 
+}
+
+/* 5. z-index для переключателя языка */
+.global-lang-switcher {
+    position: fixed !important;
+    top: 2rem !important; /* Поднимаем выше */
+    right: 1.5rem;
+    z-index: 1001 !important;
+}
+
+/* 6. Делаем меню компактным */
+.nav-container {
+    padding: 0 1.5rem !important;
+}
+
+.nav-menu {
+    gap: 1.5rem !important; 
+}
+
+.nav-link {
+    font-size: 0.9rem !important; 
+    padding: 0.3rem 0 !important;
+}
+
+/* 7. Убираем отступы для остальных секций */
+.section:first-of-type {
+    padding-top: 2rem !important;
+}
+
+/* 9. Для мобильных устройств */
+@media (max-width: 768px) {
+    body {
+        padding-top: 100px !important;
+    }
+    
+    .global-lang-switcher {
+        top: 1rem !important;
+        right: 1rem;
+        padding: 0.3rem 0.8rem !important;
+        font-size: 0.8rem;
+    }
+    
+    .navbar {
+        padding: 0.8rem 0 !important;
+    }
+}
+
+/* 10. Плавный скролл для якорных ссылок */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px; 
+}
