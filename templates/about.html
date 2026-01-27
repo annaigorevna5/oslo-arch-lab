@@ -234,9 +234,7 @@
         <!-- Our Story -->
         <div class="story-section">
             <div class="story-image">
-               <!-- ИЗМЕНЕНО: заменили на фото с Unsplash -->
-               <img src="https://images.unsplash.com/photo-1513584684374-8bab748fbf90?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" 
-                    alt="Oslo architecture studio">
+               <img src="{{ url_for('static', filename='myphotos/about.jpeg') }}">
             </div>
             <div class="story-content">
                 <h2 style="color: var(--color-fjord); margin-bottom: 1.5rem;">{{ _('Our Story') }}</h2>
