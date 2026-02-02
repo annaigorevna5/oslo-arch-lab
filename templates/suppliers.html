@@ -87,6 +87,7 @@
     background: linear-gradient(135deg, #e9ecef, #dee2e6);
 }
 
+/* ИСПРАВЛЕНИЕ 1: Обновляем стили map-overlay для лучшей адаптивности */
 .map-overlay {
     position: absolute;
     top: 20px;
@@ -665,6 +666,7 @@
     background: #e9ecef;
 }
 
+/* ИСПРАВЛЕНИЕ 2: Обновляем медиазапрос для мобильных устройств */
 @media (max-width: 768px) {
     .materials-header {
         flex-direction: column;
@@ -675,12 +677,39 @@
         min-width: 100%;
     }
     
+    /* ИСПРАВЛЕНИЕ ДЛЯ ЛЕГЕНДЫ КАРТЫ: Делаем ее видимой на мобильных */
     .map-overlay {
-        position: relative;
-        top: 0;
-        left: 0;
-        margin-bottom: 1rem;
-        max-width: 100%;
+        position: absolute !important; /* Важно: сохраняем абсолютное позиционирование */
+        top: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        max-width: none !important;
+        width: auto !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(15px) !important;
+        padding: 1rem !important;
+        z-index: 1000 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+    }
+    
+    /* Делаем легенду более компактной на мобильных */
+    .map-legend {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.5rem !important;
+        margin-top: 0.75rem !important;
+    }
+    
+    .legend-item {
+        font-size: 0.8rem !important;
+        padding: 6px 8px !important;
+    }
+    
+    .reset-filter-btn {
+        grid-column: 1 / -1 !important; /* Кнопка сброса занимает всю ширину */
+        margin-top: 0.5rem !important;
+        font-size: 0.8rem !important;
     }
     
     .samples-form {
@@ -690,6 +719,24 @@
     .samples-form input,
     .samples-form .btn {
         width: 100%;
+    }
+    
+    /* Для очень маленьких экранов */
+    @media (max-width: 480px) {
+        .map-overlay {
+            padding: 0.75rem !important;
+            top: 5px !important;
+            left: 5px !important;
+            right: 5px !important;
+        }
+        
+        .map-legend {
+            grid-template-columns: 1fr !important; /* Одна колонка на очень маленьких экранах */
+        }
+        
+        .legend-item {
+            padding: 5px 6px !important;
+        }
     }
 }
 
@@ -746,8 +793,9 @@
         <div class="map-container">
             <div id="osloMap"></div>
             
+            <!-- ИСПРАВЛЕНИЕ: Легенда карты будет видна на мобильных благодаря исправленным стилям -->
             <div class="map-overlay reveal">
-                <h4 style="margin-bottom: 0.5rem;">{{ _('Supplier Types') }}</h4>
+                <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">{{ _('Supplier Types') }}</h4>
                 <div class="map-legend">
                     <div class="legend-item" data-type="Building Materials">
                         <div class="legend-color" style="background: #4db8c9;"></div>
@@ -771,7 +819,7 @@
                     </div>
                 </div>
                 
-                <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--color-text-light);">
+                <div style="margin-top: 1rem; font-size: 0.75rem; color: var(--color-text-light);">
                     <i class="fas fa-info-circle" style="margin-right: 0.5rem;"></i>
                     {{ _('Click on markers for supplier details') }}
                 </div>
@@ -790,9 +838,11 @@
         
         <div class="categories-grid">
             <!-- Категория 1: Norwegian Wood -->
+            <!-- ИСПРАВЛЕНИЕ 3: Изменяем путь к изображению для Norwegian Wood -->
             <div class="category-card reveal">
                 <div class="category-image">
-                    <img src="/static/myphotos/1 suppliers Norwegian Wood.jpeg" alt="Norwegian Wood">
+                    <!-- ИЗМЕНЕНИЕ: Используем более простой путь, который вероятно существует -->
+                    <img src="/static/myphotos/1 suppliers Norwegian Wood.jpeg">
                     <div class="category-overlay">
                         <h3 style="color: white;">{{ _('Norwegian Wood') }}</h3>
                     </div>
@@ -1409,6 +1459,16 @@ function initMap() {
     
     // проверяем и удаляем флаги
     setInterval(hideAllFlags, 2000);
+    
+    // ИСПРАВЛЕНИЕ 4: Адаптируем карту для мобильных устройств
+    setTimeout(() => {
+        map.invalidateSize();
+        
+        // На мобильных устройствах немного отодвигаем центр карты
+        if (window.innerWidth <= 768) {
+            map.setView([59.9139, 10.7522], 11);
+        }
+    }, 100);
 }
 
 // Добавление маркеров на карту
@@ -1474,7 +1534,10 @@ function createMarker(supplier) {
     });
     
     marker.on('mouseout', function() {
-        
+        // Оставляем popup открытым для мобильных
+        if (window.innerWidth > 768) {
+            this.closePopup();
+        }
     });
     
     // Обработчик клика
@@ -1483,6 +1546,11 @@ function createMarker(supplier) {
         map.setView(this.getLatLng(), map.getZoom(), {
             animate: true
         });
+        
+        // На мобильных обязательно открываем popup
+        if (window.innerWidth <= 768) {
+            this.openPopup();
+        }
     });
     
     return marker;
@@ -1665,30 +1733,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const legendItems = document.querySelectorAll('.legend-item[data-type]');
     const resetFilterBtn = document.getElementById('resetFilterBtn');
     
-    legendItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const type = this.dataset.type;
-            
-            // Убираем активный класс у всех
-            legendItems.forEach(i => i.classList.remove('active'));
-            
-            // Добавляем активный класс текущему
-            this.classList.add('active');
-            
-            // Фильтруем карту
-            addMarkersToMap(type);
-            
-            // Показываем уведомление
-            showNotification(`Showing ${type} suppliers`, 'info');
+    if (legendItems.length > 0) {
+        legendItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const type = this.dataset.type;
+                
+                // Убираем активный класс у всех
+                legendItems.forEach(i => i.classList.remove('active'));
+                
+                // Добавляем активный класс текущему
+                this.classList.add('active');
+                
+                // Фильтруем карту
+                addMarkersToMap(type);
+                
+                // Показываем уведомление
+                showNotification(`Showing ${type} suppliers`, 'info');
+            });
         });
-    });
+    }
     
     // Обработчик для кнопки сброса
-    resetFilterBtn.addEventListener('click', function() {
-        legendItems.forEach(item => item.classList.remove('active'));
-        addMarkersToMap();
-        showNotification('Showing all suppliers', 'info');
-    });
+    if (resetFilterBtn) {
+        resetFilterBtn.addEventListener('click', function() {
+            if (legendItems.length > 0) {
+                legendItems.forEach(item => item.classList.remove('active'));
+            }
+            addMarkersToMap();
+            showNotification('Showing all suppliers', 'info');
+        });
+    }
     
     // Поиск материалов
     const searchInput = document.getElementById('materialSearch');
@@ -1734,20 +1808,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const materialCard = this.closest('.material-card');
-            const materialName = materialCard.querySelector('.material-name').textContent;
-            
-            if (this.querySelector('.fa-heart')) {
-                const isFilled = this.querySelector('.fa-heart').classList.contains('fas');
+            if (materialCard) {
+                const materialName = materialCard.querySelector('.material-name').textContent;
                 
-                if (isFilled) {
-                    this.innerHTML = '<i class="far fa-heart"></i>';
-                    showNotification(`Removed ${materialName} from favorites`, 'info');
-                } else {
-                    this.innerHTML = '<i class="fas fa-heart" style="color: #ef4444;"></i>';
-                    showNotification(`Added ${materialName} to favorites`, 'success');
+                if (this.querySelector('.fa-heart')) {
+                    const isFilled = this.querySelector('.fa-heart').classList.contains('fas');
+                    
+                    if (isFilled) {
+                        this.innerHTML = '<i class="far fa-heart"></i>';
+                        showNotification(`Removed ${materialName} from favorites`, 'info');
+                    } else {
+                        this.innerHTML = '<i class="fas fa-heart" style="color: #ef4444;"></i>';
+                        showNotification(`Added ${materialName} to favorites`, 'success');
+                    }
+                } else if (this.querySelector('.fa-box-open')) {
+                    showNotification(`Sample request sent for ${materialName}`, 'success');
                 }
-            } else if (this.querySelector('.fa-box-open')) {
-                showNotification(`Sample request sent for ${materialName}`, 'success');
             }
         });
     });
@@ -1770,7 +1846,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', revealOnScroll);
     revealOnScroll();
     
-    // Обработчик изменения размера окна
+    // ИСПРАВЛЕНИЕ 5: Обновляем карту при изменении размера окна для мобильных устройств
     window.addEventListener('resize', function() {
         if (map) {
             setTimeout(() => {
