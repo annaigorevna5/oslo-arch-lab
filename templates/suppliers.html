@@ -87,7 +87,7 @@
     background: linear-gradient(135deg, #e9ecef, #dee2e6);
 }
 
-/* ИСПРАВЛЕНИЕ 1: Обновляем стили map-overlay для лучшей адаптивности */
+/* Обновляем стили map-overlay для лучшей адаптивности */
 .map-overlay {
     position: absolute;
     top: 20px;
@@ -666,7 +666,7 @@
     background: #e9ecef;
 }
 
-/* ИСПРАВЛЕНИЕ 2: Обновляем медиазапрос для мобильных устройств */
+/* ИСПРАВЛЕНИЕ: Обновляем медиазапрос для мобильных устройств */
 @media (max-width: 768px) {
     .materials-header {
         flex-direction: column;
@@ -677,20 +677,69 @@
         min-width: 100%;
     }
     
-    /* ИСПРАВЛЕНИЕ ДЛЯ ЛЕГЕНДЫ КАРТЫ: Делаем ее видимой на мобильных */
+    /* ИСПРАВЛЕНИЕ ДЛЯ ЛЕГЕНДЫ КАРТЫ: Делаем ее компактной и закрываемой */
     .map-overlay {
-        position: absolute !important; /* Важно: сохраняем абсолютное позиционирование */
+        position: absolute !important;
         top: 10px !important;
         left: 10px !important;
         right: 10px !important;
         max-width: none !important;
         width: auto !important;
+        max-height: 200px !important;
+        overflow-y: auto !important;
         background: rgba(255, 255, 255, 0.98) !important;
         backdrop-filter: blur(15px) !important;
         padding: 1rem !important;
         z-index: 1000 !important;
         border-radius: 12px !important;
         box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* Кнопка закрытия для мобильных */
+    .map-overlay::before {
+        content: "×";
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+        background: #f1f5f9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #64748b;
+        cursor: pointer;
+        z-index: 1001;
+    }
+    
+    /* Класс для скрытой легенды */
+    .map-overlay.collapsed {
+        max-height: 50px !important;
+        overflow: hidden !important;
+        padding-right: 2.5rem !important;
+    }
+    
+    .map-overlay.collapsed .map-legend,
+    .map-overlay.collapsed > div:last-child {
+        display: none !important;
+    }
+    
+    .map-overlay.collapsed::before {
+        content: "›";
+        transform: rotate(90deg);
+        background: rgba(77, 184, 201, 0.1);
+        color: var(--color-aurora-teal);
+    }
+    
+    /* Заголовок при скрытой легенде */
+    .map-overlay.collapsed h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--color-fjord);
     }
     
     /* Делаем легенду более компактной на мобильных */
@@ -707,7 +756,7 @@
     }
     
     .reset-filter-btn {
-        grid-column: 1 / -1 !important; /* Кнопка сброса занимает всю ширину */
+        grid-column: 1 / -1 !important;
         margin-top: 0.5rem !important;
         font-size: 0.8rem !important;
     }
@@ -728,10 +777,15 @@
             top: 5px !important;
             left: 5px !important;
             right: 5px !important;
+            max-height: 180px !important;
+        }
+        
+        .map-overlay.collapsed {
+            max-height: 45px !important;
         }
         
         .map-legend {
-            grid-template-columns: 1fr !important; /* Одна колонка на очень маленьких экранах */
+            grid-template-columns: 1fr !important;
         }
         
         .legend-item {
@@ -793,7 +847,7 @@
         <div class="map-container">
             <div id="osloMap"></div>
             
-            <!-- ИСПРАВЛЕНИЕ: Легенда карты будет видна на мобильных благодаря исправленным стилям -->
+            <!-- Легенда карты с кнопкой закрытия на мобильных -->
             <div class="map-overlay reveal">
                 <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">{{ _('Supplier Types') }}</h4>
                 <div class="map-legend">
@@ -838,11 +892,9 @@
         
         <div class="categories-grid">
             <!-- Категория 1: Norwegian Wood -->
-            <!-- ИСПРАВЛЕНИЕ 3: Изменяем путь к изображению для Norwegian Wood -->
             <div class="category-card reveal">
                 <div class="category-image">
-                    <!-- ИЗМЕНЕНИЕ: Используем более простой путь, который вероятно существует -->
-                    <img src="/static/myphotos/1 suppliers Norwegian Wood.jpeg">
+                    <img src="/static/myphotos/1 suppliers Norwegian Wood.jpeg" alt="Norwegian Wood">
                     <div class="category-overlay">
                         <h3 style="color: white;">{{ _('Norwegian Wood') }}</h3>
                     </div>
@@ -1460,7 +1512,7 @@ function initMap() {
     // проверяем и удаляем флаги
     setInterval(hideAllFlags, 2000);
     
-    // ИСПРАВЛЕНИЕ 4: Адаптируем карту для мобильных устройств
+    // Адаптируем карту для мобильных устройств
     setTimeout(() => {
         map.invalidateSize();
         
@@ -1732,6 +1784,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработчики для легенды
     const legendItems = document.querySelectorAll('.legend-item[data-type]');
     const resetFilterBtn = document.getElementById('resetFilterBtn');
+    const mapOverlay = document.querySelector('.map-overlay');
+    
+    // Функция для скрытия/показа легенды на мобильных
+    function toggleLegendOnMobile() {
+        if (window.innerWidth <= 768 && mapOverlay) {
+            // Добавляем обработчик клика на саму легенду (для кнопки закрытия)
+            mapOverlay.addEventListener('click', function(e) {
+                // Если клик на кнопке закрытия (псевдоэлемент ::before)
+                if (e.target === this || window.getComputedStyle(this, '::before')) {
+                    this.classList.toggle('collapsed');
+                }
+            });
+            
+            // Автоматически скрываем легенду на мобильных при загрузке
+            mapOverlay.classList.add('collapsed');
+        }
+    }
     
     if (legendItems.length > 0) {
         legendItems.forEach(item => {
@@ -1846,13 +1915,18 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', revealOnScroll);
     revealOnScroll();
     
-    // ИСПРАВЛЕНИЕ 5: Обновляем карту при изменении размера окна для мобильных устройств
+    // Инициализация скрытия легенды на мобильных
+    toggleLegendOnMobile();
+    
+    // Обновляем карту при изменении размера окна
     window.addEventListener('resize', function() {
         if (map) {
             setTimeout(() => {
                 map.invalidateSize();
             }, 100);
         }
+        // Переинициализируем скрытие легенды при изменении размера
+        toggleLegendOnMobile();
     });
 });
 </script>
